@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test'
 // Depende do modo demo/offline para usar os dados mockados do app.
 test('fluxo feliz demo offline', async ({ page }) => {
   const leadName = `Lead E2E ${Date.now()}`
+  const leadEmail = `e2e-${Date.now()}@example.com`
 
   await page.goto('/login')
   await page.getByLabel('E-mail').fill('demo@sdrflow.ai')
@@ -21,7 +22,7 @@ test('fluxo feliz demo offline', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /novo lead/i })).toBeVisible()
   await page.getByPlaceholder('Nome').fill(leadName)
   await page.locator('select').first().selectOption({ index: 1 })
-  await page.getByPlaceholder('Email').fill(`e2e-${Date.now()}@example.com`)
+  await page.getByPlaceholder('Email').fill(leadEmail)
   await page.getByPlaceholder('Empresa').fill('Empresa E2E')
   await page.getByPlaceholder('Cargo').fill('SDR')
   await page.getByPlaceholder('Origem').fill('Teste')
@@ -31,6 +32,17 @@ test('fluxo feliz demo offline', async ({ page }) => {
   await expect(page).toHaveURL(/\/kanban/)
   await page.getByPlaceholder('Buscar por nome, email ou empresa').fill(leadName)
   await expect(page.getByText(leadName)).toBeVisible()
+
+  // Navegar para a página de detalhe do lead clicando no card
+  await page.getByRole('link', { name: 'Ver' }).click()
+  await expect(page).toHaveURL(/\/leads\/.+/)
+
+  // Verificar dados do lead na página de detalhe
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(leadName)
+  await expect(page.getByText(leadEmail)).toBeVisible()
+  await expect(page.getByText('Empresa E2E')).toBeVisible()
+  await expect(page.getByText('SDR')).toBeVisible()
+  await expect(page.getByText('Teste')).toBeVisible()
 
   await page.goto('/campaigns')
   await expect(page.getByRole('heading', { name: /campanhas/i })).toBeVisible()
