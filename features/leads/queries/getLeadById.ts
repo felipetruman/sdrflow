@@ -8,7 +8,7 @@ import type { Lead } from '@/types/app'
 export async function getLeadById(id: string): Promise<Lead | null> {
   if (isDemoMode()) return enrichLeadsWithStage(demoStore.getState().leads).find((lead) => lead.id === id) ?? null
   try {
-    const supabase = (await createClient()) as any
+    const supabase = await createClient()
     const { data, error } = await supabase.from('leads').select('*').eq('id', id).maybeSingle()
     if (error) throw error
     return (data as Lead | null) ?? null

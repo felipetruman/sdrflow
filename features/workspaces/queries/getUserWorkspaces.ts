@@ -9,5 +9,6 @@ export async function getUserWorkspaces(): Promise<Workspace[]> {
   if (!userData.user) return []
   const { data, error } = await supabase.from('workspace_members').select('workspaces(*)').eq('user_id', userData.user.id)
   if (error || !data) return []
-  return data.map((row: any) => Array.isArray(row.workspaces) ? row.workspaces[0] : row.workspaces).filter(Boolean) as Workspace[]
+  type WorkspaceMemberRow = { workspaces: Workspace | Workspace[] | null }
+  return (data as unknown as WorkspaceMemberRow[]).map((row) => Array.isArray(row.workspaces) ? row.workspaces[0] : row.workspaces).filter(Boolean) as Workspace[]
 }

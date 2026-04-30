@@ -13,7 +13,7 @@ export interface CreateCustomFieldInput {
 export async function createCustomField(data: CreateCustomFieldInput): Promise<{ error?: string }> {
   try {
     const supabase = await createClient()
-    const { error } = await supabase.from('custom_fields').insert({ name: data.name.trim(), key: data.key.trim(), field_type: data.field_type, options: data.options ?? null } as any)
+    const { error } = await supabase.from('custom_fields').insert({ name: data.name.trim(), key: data.key.trim(), field_type: data.field_type, options: data.options ?? null })
     if (error) throw error
     return {}
   } catch (error) {

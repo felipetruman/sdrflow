@@ -14,7 +14,7 @@ export async function updateStageRequiredFields({ stageId, fields }: { stageId: 
     if (deleteError) throw deleteError
 
     if (fields.length > 0) {
-      const { error: insertError } = await (supabase.from('stage_required_fields') as any).insert(fields.map((field) => ({ workspace_id: workspace.id, stage_id: stageId, ...field })))
+      const { error: insertError } = await supabase.from('stage_required_fields').insert(fields.map((field) => ({ workspace_id: workspace.id, stage_id: stageId, ...field })))
       if (insertError) throw insertError
     }
 

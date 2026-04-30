@@ -1,9 +1,11 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { createDemoClient } from '@/lib/demo/client'
 import { isDemoMode } from '@/lib/demo/data'
+import type { CookieOptions, SupabaseClientLike } from './types'
 
-export async function createClient() {
-  if (isDemoMode()) return null as any
+export async function createClient(): Promise<SupabaseClientLike> {
+  if (isDemoMode()) return createDemoClient()
   const cookieStore = await cookies()
 
   return createServerClient(
@@ -14,7 +16,7 @@ export async function createClient() {
         getAll() {
           return cookieStore.getAll()
         },
-        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
+        setAll(cookiesToSet: { name: string; value: string; options?: CookieOptions }[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options),
@@ -25,5 +27,5 @@ export async function createClient() {
         },
       },
     },
-  )
+  ) as unknown as SupabaseClientLike
 }

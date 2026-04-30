@@ -1,19 +1,32 @@
 import { demoStore } from './data'
+import type { SupabaseClientLike, SupabaseQueryBuilder } from '@/lib/supabase/types'
 
-export function createDemoClient() {
+type DemoRow = { workspace_id?: string; workspaces?: unknown; lead?: unknown; id?: string }
+
+const createChain = <T>(table: string): SupabaseQueryBuilder<T> => {
+  const chain: SupabaseQueryBuilder<T> = {
+    then: (onfulfilled, onrejected) => Promise.resolve({ data: null, error: null }).then(onfulfilled, onrejected),
+    select: () => chain,
+    eq: () => chain,
+    order: () => chain,
+    maybeSingle: async () => ({
+      data: table === 'workspace_members' ? ({ workspace_id: demoStore.getState().workspace.id, workspaces: demoStore.getState().workspace } as unknown as T) : null,
+      error: null,
+    }),
+    single: async () => ({ data: null, error: null }),
+    insert: () => chain,
+    update: () => chain,
+    delete: () => chain,
+    upsert: () => chain,
+  }
+  return chain
+}
+
+export function createDemoClient(): SupabaseClientLike {
   return {
-    auth: { getUser: async () => ({ data: { user: { id: 'demo-user', email: 'demo@sdrflow.ai' } }, error: null }) },
-    from(table: string) {
-      const chain: any = {
-        select: () => chain,
-        eq: () => chain,
-        order: () => chain,
-        maybeSingle: async () => ({ data: table === 'workspace_members' ? { workspace_id: demoStore.getState().workspace.id, workspaces: demoStore.getState().workspace } : null, error: null }),
-        single: async () => ({ data: null, error: null }),
-        insert: async () => ({ data: null, error: null }),
-        update: () => chain,
-      }
-      return chain
-    },
+    auth: { getUser: async () => ({ data: { user: { id: 'demo-user', email: 'demo@sdrflow.ai' } }, error: null }), signInWithPassword: async () => ({ data: null, error: null }), signUp: async () => ({ data: null, error: null }), signOut: async () => ({ error: null }) },
+    from: (table) => createChain<unknown>(table),
+    functions: { invoke: async () => ({ data: null, error: null }) },
+    rpc: async () => ({ data: null, error: null }),
   }
 }

@@ -15,7 +15,7 @@ const toNullableString = (value?: string | null) => {
 
 export async function updateCampaign(id: string, data: UpdateCampaignInput): Promise<UpdateCampaignResult> {
   try {
-    const supabase = (await createClient()) as any
+    const supabase = await createClient()
     const payload = {
       ...(data.name !== undefined ? { name: data.name.trim() } : {}),
       ...(data.context !== undefined ? { context: data.context.trim() } : {}),

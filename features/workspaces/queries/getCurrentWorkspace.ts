@@ -9,7 +9,8 @@ export async function getCurrentWorkspace(): Promise<Workspace | null> {
   const supabase = await createClient()
   const { data: userData } = await supabase.auth.getUser()
   if (!userData.user) return null
-  const { data, error } = await supabase.from('workspace_members').select('workspaces(*)').eq('user_id', userData.user.id).maybeSingle()
+  type WorkspaceMemberWithWorkspace = { workspaces: Workspace | Workspace[] | null }
+  const { data, error } = await supabase.from('workspace_members').select('workspaces(*)').eq('user_id', userData.user.id).maybeSingle() as { data: WorkspaceMemberWithWorkspace | null; error: unknown }
   if (error || !data?.workspaces) return null
   const ws = Array.isArray(data.workspaces) ? data.workspaces[0] : data.workspaces
   return ws as Workspace

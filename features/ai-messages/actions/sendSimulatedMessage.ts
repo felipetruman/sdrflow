@@ -5,13 +5,15 @@ import { getErrorMessage } from '@/lib/utils/errors'
 
 export async function sendSimulatedMessage({ messageId }: { messageId: string }): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = (await createClient()) as any
+    const supabase = await createClient()
     const result = await supabase.functions.invoke('send-message-simulated', { body: { messageId } })
     if (!result.error) return { success: true }
 
-    const { data: message, error: messageError } = await supabase.from('generated_messages').select('*, lead:leads(*)').eq('id', messageId).single()
+    type GeneratedMessageWithLead = { lead_id: string; lead: { workspace_id: string } | null }
+    const { data: message, error: messageError } = await supabase.from('generated_messages').select('*, lead:leads(*)').eq('id', messageId).single() as { data: GeneratedMessageWithLead | null; error: unknown }
     if (messageError) throw messageError
-    const { data: stage } = await supabase.from('funnel_stages').select('id').eq('name', 'Tentando Contato').maybeSingle()
+    if (!message?.lead) return { success: false, error: 'Mensagem ou lead não encontrado' }
+    const { data: stage } = await supabase.from('funnel_stages').select('id').eq('name', 'Tentando Contato').maybeSingle() as { data: { id: string } | null; error: unknown }
     if (stage?.id && message?.lead) await supabase.from('leads').update({ stage_id: stage.id }).eq('id', message.lead_id)
     await supabase.from('generated_messages').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', messageId)
     await supabase.from('lead_activities').insert([{ lead_id: message.lead_id, workspace_id: message.lead.workspace_id, type: 'message_generated', metadata: { message_id: messageId } }, { lead_id: message.lead_id, workspace_id: message.lead.workspace_id, type: 'message_sent', metadata: { message_id: messageId } }])

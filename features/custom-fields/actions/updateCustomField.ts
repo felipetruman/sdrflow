@@ -15,7 +15,7 @@ export async function updateCustomField(data: UpdateCustomFieldInput): Promise<{
   try {
     const supabase = await createClient()
     const { id, ...payload } = data
-    const { error } = await (supabase.from('custom_fields') as any).update({ ...(payload.name !== undefined ? { name: payload.name.trim() } : {}), ...(payload.key !== undefined ? { key: payload.key.trim() } : {}), ...(payload.field_type !== undefined ? { field_type: payload.field_type } : {}), ...(payload.options !== undefined ? { options: payload.options } : {}) }).eq('id', id)
+    const { error } = await supabase.from('custom_fields').update({ ...(payload.name !== undefined ? { name: payload.name.trim() } : {}), ...(payload.key !== undefined ? { key: payload.key.trim() } : {}), ...(payload.field_type !== undefined ? { field_type: payload.field_type } : {}), ...(payload.options !== undefined ? { options: payload.options } : {}) }).eq('id', id)
     if (error) throw error
     return {}
   } catch (error) {

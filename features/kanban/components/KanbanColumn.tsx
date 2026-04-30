@@ -4,7 +4,13 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import type { FunnelStage, LeadWithStage } from '@/types/app'
 import { LeadCard } from './LeadCard'
 
-export function KanbanColumn({ stage, leads }: { stage: FunnelStage; leads: LeadWithStage[] }) {
+type Props = {
+  stage: FunnelStage
+  leads: LeadWithStage[]
+  onEditLead?: (lead: LeadWithStage) => void
+}
+
+export function KanbanColumn({ stage, leads, onEditLead }: Props) {
   return (
     <div className="flex w-full min-w-[280px] flex-col rounded-2xl bg-slate-50 p-4">
       <div className="mb-4 flex items-center justify-between">
@@ -13,7 +19,7 @@ export function KanbanColumn({ stage, leads }: { stage: FunnelStage; leads: Lead
       </div>
       <SortableContext items={leads.map((lead) => lead.id)} strategy={verticalListSortingStrategy}>
         <div className="flex flex-1 flex-col gap-3">
-          {leads.map((lead) => <LeadCard key={lead.id} lead={lead} />)}
+          {leads.map((lead) => <LeadCard key={lead.id} lead={lead} onEdit={onEditLead} />)}
         </div>
       </SortableContext>
     </div>

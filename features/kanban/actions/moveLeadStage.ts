@@ -30,15 +30,17 @@ export async function moveLeadStage({ leadId, stageId }: MoveLeadStageInput): Pr
 
     const { data: lead, error: leadError } = await supabase.from('leads').select('id, stage_id, workspace_id').eq('id', leadId).single()
     if (leadError) throw leadError
+    if (!lead) return { success: false, error: 'Lead não encontrado.' }
+    const leadData = lead as { id: string; stage_id: string; workspace_id: string }
 
-    const { error: updateError } = await (supabase.from('leads') as any).update({ stage_id: stageId }).eq('id', leadId)
+    const { error: updateError } = await supabase.from('leads').update({ stage_id: stageId }).eq('id', leadId)
     if (updateError) throw updateError
 
-    const { error: activityError } = await (supabase.from('lead_activities') as any).insert({
+    const { error: activityError } = await supabase.from('lead_activities').insert({
       lead_id: leadId,
-      workspace_id: lead.workspace_id,
+      workspace_id: leadData.workspace_id,
       type: 'stage_changed',
-      metadata: { from_stage_id: lead.stage_id, to_stage_id: stageId },
+      metadata: { from_stage_id: leadData.stage_id, to_stage_id: stageId },
     })
     if (activityError) throw activityError
 

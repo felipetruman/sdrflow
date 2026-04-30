@@ -3,8 +3,23 @@ import './globals.css'
 import { ToastProvider } from '@/components/ToastProvider'
 
 export const metadata: Metadata = {
-  title: 'SDRFlow AI',
-  description: 'Mini CRM para equipes de pré-vendas com geração de mensagens por IA',
+  metadataBase: new URL('https://sdrflow.ai'),
+  title: {
+    default: 'SDRFlow AI',
+    template: '%s | SDRFlow AI',
+  },
+  description: 'CRM leve para SDRs com funil, Kanban e automação de mensagens por IA.',
+  openGraph: {
+    title: 'SDRFlow AI',
+    description: 'CRM leve para SDRs com funil, Kanban e automação de mensagens por IA.',
+    type: 'website',
+    url: 'https://sdrflow.ai',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SDRFlow AI',
+    description: 'CRM leve para SDRs com funil, Kanban e automação de mensagens por IA.',
+  },
 }
 
 export default function RootLayout({

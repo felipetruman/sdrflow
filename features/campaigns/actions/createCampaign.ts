@@ -11,7 +11,8 @@ type CreateCampaignResult = { data?: Campaign; error?: string }
 async function getCurrentWorkspace(supabase: Awaited<ReturnType<typeof createClient>>) {
   const { data: authData } = await supabase.auth.getUser()
   if (!authData.user) return null
-  const { data, error } = await (supabase as any).from('workspace_members').select('workspaces (*)').eq('user_id', authData.user.id).maybeSingle()
+  type WorkspaceMemberWithWorkspace = { workspaces: Database['public']['Tables']['workspaces']['Row'] | null }
+  const { data, error } = await supabase.from('workspace_members').select('workspaces (*)').eq('user_id', authData.user.id).maybeSingle() as { data: WorkspaceMemberWithWorkspace | null; error: unknown }
   if (error) throw error
   return (data?.workspaces as Database['public']['Tables']['workspaces']['Row'] | null) ?? null
 }
@@ -23,7 +24,7 @@ const toNullableString = (value?: string | null) => {
 
 export async function createCampaign(data: CampaignSchema): Promise<CreateCampaignResult> {
   try {
-    const supabase = (await createClient()) as any
+    const supabase = await createClient()
     const workspace = await getCurrentWorkspace(supabase)
     if (!workspace) return { error: 'Workspace atual não encontrado' }
 
