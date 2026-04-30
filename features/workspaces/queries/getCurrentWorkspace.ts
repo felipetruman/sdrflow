@@ -1,0 +1,14 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import type { Workspace } from '@/types/app'
+
+export async function getCurrentWorkspace(): Promise<Workspace | null> {
+  const supabase = await createClient()
+  const { data: userData } = await supabase.auth.getUser()
+  if (!userData.user) return null
+  const { data, error } = await supabase.from('workspace_members').select('workspaces(*)').eq('user_id', userData.user.id).maybeSingle()
+  if (error || !data?.workspaces) return null
+  const ws = Array.isArray(data.workspaces) ? data.workspaces[0] : data.workspaces
+  return ws as Workspace
+}
