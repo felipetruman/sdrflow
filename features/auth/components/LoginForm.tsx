@@ -49,7 +49,7 @@ export function LoginForm() {
         <p className="mt-1 text-sm text-slate-500">Entre na sua conta para continuar</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} method="POST" action="#" noValidate className="space-y-4">
         <div className="space-y-2">
           <label htmlFor="email" className="block text-sm font-medium text-slate-700">
             E-mail
@@ -91,6 +91,7 @@ export function LoginForm() {
         )}
 
         <button
+          type="submit"
           disabled={isSubmitting}
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:opacity-50"
         >
