@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { demoStore, isDemoMode } from '@/lib/demo/data'
 import { getErrorMessage } from '@/lib/utils/errors'
 import type { DashboardMetrics } from '@/types/app'
 
@@ -15,6 +16,11 @@ async function getCurrentWorkspaceId() {
 
 export async function getDashboardMetrics(): Promise<DashboardMetrics> {
   const empty: DashboardMetrics = { totalLeads: 0, leadsByStage: [], activeCampaigns: 0, totalMessagesGenerated: 0, totalMessagesSent: 0 }
+  if (isDemoMode()) {
+    const demo = demoStore.getState()
+    const leadsByStage = demo.stages.map((stage) => ({ stage_id: stage.id, stage_name: stage.name, count: demo.leads.filter((lead) => lead.stage_id === stage.id).length })).filter((item) => item.count > 0)
+    return { totalLeads: demo.leads.length, leadsByStage, activeCampaigns: demo.campaigns.filter((campaign) => campaign.status === 'active').length, totalMessagesGenerated: demo.messages.length, totalMessagesSent: demo.messages.filter((message) => message.status === 'sent').length }
+  }
   try {
     const supabase = (await createClient()) as any
     const workspaceId = await getCurrentWorkspaceId()

@@ -8,6 +8,7 @@ import { createCampaign } from '@/features/campaigns/actions/createCampaign'
 import { updateCampaign } from '@/features/campaigns/actions/updateCampaign'
 import type { Campaign, FunnelStage } from '@/types/app'
 import { getFunnelStages } from '@/features/campaigns/queries/getFunnelStages'
+import { useToast } from '@/lib/hooks/useToast'
 
 type Props = { campaign?: Campaign }
 
@@ -15,6 +16,7 @@ export function CampaignForm({ campaign }: Props) {
   const [stages, setStages] = useState<FunnelStage[]>([])
   const [message, setMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const { toast } = useToast()
   const form = useForm<CampaignSchema>({
     resolver: zodResolver(campaignSchema),
     defaultValues: campaign
@@ -38,7 +40,7 @@ export function CampaignForm({ campaign }: Props) {
   const onSubmit = async (values: CampaignSchema) => {
     setLoading(true); setMessage(null)
     const result = campaign ? await updateCampaign(campaign.id, values) : await createCampaign(values)
-    setMessage(result.error ?? 'Salvo com sucesso')
+    if (result.error) { setMessage(result.error); toast.error(result.error) } else { setMessage('Salvo com sucesso'); toast.success('Campanha salva!') }
     setLoading(false)
   }
 

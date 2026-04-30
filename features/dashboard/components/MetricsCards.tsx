@@ -1,8 +1,11 @@
 'use client'
 
+import { Inbox } from 'lucide-react'
+import { EmptyState } from '@/components/EmptyState'
 import type { DashboardMetrics } from '@/types/app'
 
 export function MetricsCards({ metrics }: { metrics: DashboardMetrics }) {
+  if (metrics.totalLeads === 0) return <EmptyState icon={Inbox} title="Sem leads ainda" description="Assim que os leads entrarem, os indicadores aparecem aqui." />
   const cards = [
     ['Total Leads', metrics.totalLeads],
     ['Campanhas Ativas', metrics.activeCampaigns],

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { demoStore, isDemoMode } from '@/lib/demo/data'
 import { getErrorMessage } from '@/lib/utils/errors'
 import type { LeadSchema } from '@/lib/validations/leadSchema'
 import type { Lead } from '@/types/app'
@@ -14,6 +15,7 @@ const toNullableString = (value: string | undefined | null) => {
 }
 
 export async function updateLead(id: string, data: UpdateLeadInput): Promise<UpdateLeadResult> {
+  if (isDemoMode()) return { data: demoStore.updateLead(id, { ...(data.name ? { name: data.name.trim() } : {}), ...(data.stage_id ? { stage_id: data.stage_id } : {}), ...(data.email !== undefined ? { email: toNullableString(data.email) } : {}), ...(data.phone !== undefined ? { phone: toNullableString(data.phone) } : {}), ...(data.company !== undefined ? { company: toNullableString(data.company) } : {}), ...(data.job_title !== undefined ? { job_title: toNullableString(data.job_title) } : {}), ...(data.source !== undefined ? { source: toNullableString(data.source) } : {}), ...(data.notes !== undefined ? { notes: toNullableString(data.notes) } : {}), ...(data.owner_id !== undefined ? { owner_id: toNullableString(data.owner_id) } : {}), }) as Lead }
   try {
     const supabase = (await createClient()) as any
     const payload = { ...(data.name ? { name: data.name.trim() } : {}), ...(data.stage_id ? { stage_id: data.stage_id } : {}), ...(data.email !== undefined ? { email: toNullableString(data.email) } : {}), ...(data.phone !== undefined ? { phone: toNullableString(data.phone) } : {}), ...(data.company !== undefined ? { company: toNullableString(data.company) } : {}), ...(data.job_title !== undefined ? { job_title: toNullableString(data.job_title) } : {}), ...(data.source !== undefined ? { source: toNullableString(data.source) } : {}), ...(data.notes !== undefined ? { notes: toNullableString(data.notes) } : {}), ...(data.owner_id !== undefined ? { owner_id: toNullableString(data.owner_id) } : {}) }

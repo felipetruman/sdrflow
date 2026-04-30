@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { enrichLeadsWithStage, isDemoMode, demoStore } from '@/lib/demo/data'
 import { getErrorMessage } from '@/lib/utils/errors'
 import type { LeadWithStage } from '@/types/app'
 
@@ -14,6 +15,7 @@ async function getCurrentWorkspaceId() {
 }
 
 export async function getLeads(): Promise<LeadWithStage[]> {
+  if (isDemoMode()) return enrichLeadsWithStage(demoStore.getState().leads)
   try {
     const supabase = (await createClient()) as any
     const workspaceId = await getCurrentWorkspaceId()

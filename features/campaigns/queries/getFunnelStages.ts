@@ -1,10 +1,12 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { DEMO_STAGES, isDemoMode } from '@/lib/demo/data'
 import { getErrorMessage } from '@/lib/utils/errors'
 import type { FunnelStage } from '@/types/app'
 
 export async function getFunnelStages(): Promise<FunnelStage[]> {
+  if (isDemoMode()) return DEMO_STAGES
   try {
     const supabase = (await createClient()) as any
     const { data: authData } = await supabase.auth.getUser()

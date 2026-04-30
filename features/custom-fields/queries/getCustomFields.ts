@@ -2,10 +2,12 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentWorkspace } from '@/features/workspaces/queries/getCurrentWorkspace'
+import { demoStore, isDemoMode } from '@/lib/demo/data'
 import { getErrorMessage } from '@/lib/utils/errors'
 import type { CustomField } from '@/types/app'
 
 export async function getCustomFields(): Promise<CustomField[]> {
+  if (isDemoMode()) return demoStore.getState().customFields
   try {
     const supabase = await createClient()
     const workspace = await getCurrentWorkspace()

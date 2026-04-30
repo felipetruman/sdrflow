@@ -1,9 +1,11 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { DEMO_WORKSPACE, isDemoMode } from '@/lib/demo/data'
 import type { Workspace } from '@/types/app'
 
 export async function getCurrentWorkspace(): Promise<Workspace | null> {
+  if (isDemoMode()) return DEMO_WORKSPACE
   const supabase = await createClient()
   const { data: userData } = await supabase.auth.getUser()
   if (!userData.user) return null

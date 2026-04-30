@@ -9,9 +9,9 @@ import type { LeadWithStage } from '@/types/app'
 export function LeadCard({ lead }: { lead: LeadWithStage }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: lead.id })
   return (
-    <Link ref={setNodeRef} href={`/leads/${lead.id}`} style={{ transform: CSS.Transform.toString(transform), transition }} className={`block rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md ${isDragging ? 'opacity-60' : ''}`}>
+    <Link ref={setNodeRef} href={`/leads/${lead.id}`} style={{ transform: CSS.Transform.toString(transform), transition }} className={`block max-w-full rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md ${isDragging ? 'opacity-60' : ''}`}>
       <div {...attributes} {...listeners} className="mb-3 flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <h4 className="font-semibold text-slate-900">{lead.name}</h4>
           {lead.company ? <p className="mt-1 flex items-center gap-1 text-sm text-slate-500"><Building2 className="h-3.5 w-3.5" />{lead.company}</p> : null}
         </div>

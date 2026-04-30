@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { demoStore, isDemoMode } from '@/lib/demo/data'
 import { getErrorMessage } from '@/lib/utils/errors'
 import type { Campaign } from '@/types/app'
 
@@ -14,6 +15,7 @@ async function getCurrentWorkspaceId() {
 }
 
 export async function getActiveCampaigns(): Promise<Campaign[]> {
+  if (isDemoMode()) return demoStore.getState().campaigns.filter((campaign) => campaign.status === 'active')
   try {
     const supabase = (await createClient()) as any
     const workspaceId = await getCurrentWorkspaceId()

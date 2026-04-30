@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { demoStore, isDemoMode } from '@/lib/demo/data'
 import { getErrorMessage } from '@/lib/utils/errors'
 
 export interface MoveLeadStageInput {
@@ -15,6 +16,10 @@ export interface MoveLeadStageResult {
 }
 
 export async function moveLeadStage({ leadId, stageId }: MoveLeadStageInput): Promise<MoveLeadStageResult> {
+  if (isDemoMode()) {
+    demoStore.moveLeadStage(leadId, stageId)
+    return { success: true }
+  }
   try {
     const missingFields = [!leadId ? 'leadId' : null, !stageId ? 'stageId' : null].filter(Boolean) as string[]
     if (missingFields.length) return { success: false, error: 'Campos obrigatórios ausentes.', missingFields }

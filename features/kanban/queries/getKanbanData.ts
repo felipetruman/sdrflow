@@ -2,10 +2,17 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentWorkspace } from '@/features/workspaces/queries/getCurrentWorkspace'
+import { enrichLeadsWithStage, isDemoMode } from '@/lib/demo/data'
 import { getErrorMessage } from '@/lib/utils/errors'
 import type { KanbanData } from '@/types/app'
 
 export async function getKanbanData(): Promise<KanbanData> {
+  if (isDemoMode()) {
+    const workspace = await getCurrentWorkspace()
+    if (!workspace) return { stages: [], leads: [] }
+    const demo = (await import('@/lib/demo/data')).demoStore.getState()
+    return { stages: demo.stages, leads: enrichLeadsWithStage(demo.leads) }
+  }
   try {
     const supabase = await createClient()
     const workspace = await getCurrentWorkspace()

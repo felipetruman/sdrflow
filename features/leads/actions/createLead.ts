@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { demoStore, isDemoMode } from '@/lib/demo/data'
 import { getErrorMessage } from '@/lib/utils/errors'
 import type { LeadSchema } from '@/lib/validations/leadSchema'
 import type { Lead } from '@/types/app'
@@ -22,6 +23,10 @@ const toNullableString = (value: string | undefined | null) => {
 }
 
 export async function createLead(data: LeadSchema): Promise<CreateLeadResult> {
+  if (isDemoMode()) {
+    const lead = demoStore.addLead({ id: `lead-${Date.now()}`, workspace_id: demoStore.getState().workspace.id, stage_id: data.stage_id, name: data.name.trim(), email: toNullableString(data.email), phone: toNullableString(data.phone), company: toNullableString(data.company), job_title: toNullableString(data.job_title), source: toNullableString(data.source), notes: toNullableString(data.notes), owner_id: toNullableString(data.owner_id), status: 'active', created_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    return { data: lead }
+  }
   try {
     const supabase = (await createClient()) as any
     const workspace = await getCurrentWorkspace(supabase)
