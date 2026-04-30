@@ -1,0 +1,114 @@
+name: E2E Autonomous Healing
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * *'  # 03:00 BRT
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-healing-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  MAX_CLUSTERS: '5'
+
+jobs:
+  playwright:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm exec playwright install --with-deps chromium
+
+      - id: run
+        name: Run Playwright (demo mode)
+        run: pnpm exec playwright test --reporter=list,json
+        continue-on-error: true
+        env:
+          USE_DEMO_MODE: 'true'
+          PLAYWRIGHT_JSON_OUTPUT_NAME: playwright-report/results.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ github.run_number }}
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Falhar se testes falharam
+        if: steps.run.outcome == 'failure'
+        run: exit 1
+
+  heal:
+    name: AI Healing
+    needs: playwright
+    if: failure()
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # HEALING_PAT: PAT pessoal com repo + PR create.
+          # GITHUB_TOKEN não dispara novos workflows ao criar PRs.
+          token: ${{ secrets.HEALING_PAT }}
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm exec playwright install --with-deps chromium
+
+      - name: Baixar relatório Playwright
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_number }}
+          path: playwright-report/
+
+      - name: Configurar identidade git
+        run: |
+          git config user.name "E2E Healer [bot]"
+          git config user.email "healer@freedomdigitalhub.com.br"
+
+      - name: Executar orquestrador de healing
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-sonnet-4-6
+          allowed_tools: "Bash,Read,Write,Edit,Glob,Grep"
+          max_turns: 30
+          prompt: "Read .claude/e2e-orchestrator-prompt.md and follow every step exactly. Do not summarize or skip steps."
+        env:
+          GH_TOKEN: ${{ secrets.HEALING_PAT }}
+          MAX_CLUSTERS: ${{ env.MAX_CLUSTERS }}
+          HEALING_SHA: ${{ github.sha }}
+          HEALING_RUN: ${{ github.run_number }}
+          HEALING_REF: ${{ github.ref }}
+          USE_DEMO_MODE: 'true'
