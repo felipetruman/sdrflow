@@ -9,7 +9,7 @@ export const leadSchema = z.object({
   source: z.string().max(200).optional().or(z.literal('')),
   notes: z.string().optional().or(z.literal('')),
   stage_id: z.string().uuid('Etapa inválida'),
-  owner_id: z.string().uuid().optional().or(z.literal('')),
+  owner_id: z.string().max(100).optional().or(z.literal('')),
 })
 
 export type LeadSchema = z.infer<typeof leadSchema>
