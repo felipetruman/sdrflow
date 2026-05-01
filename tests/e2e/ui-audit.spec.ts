@@ -5,8 +5,8 @@ import path from 'node:path'
 const baseURL = 'http://127.0.0.1:3000'
 const outDir = '/home/freedom/freedomdigitalhub/workspace/products/sdrflow/images'
 const logFile = path.join(outDir, 'ui-audit.log')
-const email = 'codex.auth.1777583193@example.com'
-const password = 'Sdrflow@123'
+const email = process.env.E2E_EMAIL ?? 'codex.auth.1777583193@example.com'
+const password = process.env.E2E_PASSWORD ?? 'Sdrflow@123'
 
 function append(line: string) {
   fs.appendFileSync(logFile, line + '\n')

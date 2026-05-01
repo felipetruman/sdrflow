@@ -59,7 +59,7 @@ jobs:
           GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           DIFF_RANGE: ${{ steps.diff.outputs.range }}
-          GITHUB_BASE_REF: ${{ github.base_ref }}
+          BASE_REF: ${{ github.base_ref }}
         run: node .claude/review-agents/gemini-reviewer.mjs
 
       - name: Upload review results
