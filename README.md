@@ -122,6 +122,19 @@ pnpm dev
 | `LLM_MODEL` | Opcional | Modelo padrão da geração |
 | `LLM_BASE_URL` | Opcional | Base URL do provedor de IA |
 
+## Como aplicar migrations e deployar Edge Functions
+
+```bash
+# Aplicar migrations
+supabase --workdir "/home/freedom/freedomdigitalhub/workspace/products/sdrflow" db push --include-all
+
+# Deploy Edge Functions
+supabase --workdir "/home/freedom/freedomdigitalhub/workspace/products/sdrflow" functions deploy generate-messages
+supabase --workdir "/home/freedom/freedomdigitalhub/workspace/products/sdrflow" functions deploy send-message-simulated
+supabase --workdir "/home/freedom/freedomdigitalhub/workspace/products/sdrflow" functions deploy move-lead-stage
+supabase --workdir "/home/freedom/freedomdigitalhub/workspace/products/sdrflow" functions deploy trigger-generate-messages
+```
+
 ## 11. Deploy
 
 - **Produção**: [https://sdrflow.vercel.app](https://sdrflow.vercel.app)

@@ -1492,43 +1492,43 @@ Priorizar telas essenciais e componentes reaproveitáveis.
 
 ### Obrigatórios
 
-* [ ] Cadastro e login.
-* [ ] Workspace criado por usuário.
-* [ ] Dados isolados por workspace.
-* [ ] Leads com campos padrão.
-* [ ] Campos personalizados por workspace.
-* [ ] Responsável opcional pelo lead.
-* [ ] Kanban por etapas.
-* [ ] Mover lead entre etapas.
-* [ ] Detalhe e edição do lead.
-* [ ] Funil SDR padrão.
-* [ ] Criar campanhas.
-* [ ] Contexto da campanha.
-* [ ] Prompt de geração.
-* [ ] Gerar 3 mensagens com IA.
-* [ ] Regenerar mensagens.
-* [ ] Copiar mensagem.
-* [ ] Enviar mensagem simulada.
-* [ ] Ao enviar, mover lead para **Tentando Contato**.
-* [ ] Configurar campos obrigatórios por etapa.
-* [ ] Validar campos obrigatórios na movimentação.
-* [ ] Dashboard básico.
-* [ ] Supabase Edge Functions.
-* [ ] Supabase PostgreSQL.
-* [ ] Supabase Auth.
-* [ ] GitHub.
-* [ ] Deploy.
-* [ ] README.
-* [ ] Vídeo de até 10 minutos.
+* [x] Cadastro e login.
+* [x] Workspace criado por usuário.
+* [x] Dados isolados por workspace.
+* [x] Leads com campos padrão.
+* [x] Campos personalizados por workspace.
+* [x] Responsável opcional pelo lead.
+* [x] Kanban por etapas.
+* [x] Mover lead entre etapas.
+* [x] Detalhe e edição do lead.
+* [x] Funil SDR padrão.
+* [x] Criar campanhas.
+* [x] Contexto da campanha.
+* [x] Prompt de geração.
+* [x] Gerar 3 mensagens com IA.
+* [x] Regenerar mensagens.
+* [x] Copiar mensagem.
+* [x] Enviar mensagem simulada.
+* [x] Ao enviar, mover lead para **Tentando Contato**.
+* [x] Configurar campos obrigatórios por etapa.
+* [x] Validar campos obrigatórios na movimentação.
+* [x] Dashboard básico.
+* [x] Supabase Edge Functions.
+* [x] Supabase PostgreSQL.
+* [x] Supabase Auth.
+* [x] GitHub.
+* [x] Deploy.
+* [x] README.
+* [x] Vídeo de até 10 minutos.
 
 ### Diferenciais selecionados
 
-* [ ] RLS bem implementado.
-* [ ] Histórico de atividades.
-* [ ] Histórico de mensagens enviadas.
-* [ ] Filtros e busca.
-* [ ] Geração automática por etapa gatilho.
-* [ ] Métricas extras no dashboard.
+* [x] RLS bem implementado.
+* [x] Histórico de atividades.
+* [x] Histórico de mensagens enviadas.
+* [x] Filtros e busca.
+* [x] Geração automática por etapa gatilho.
+* [x] Métricas extras no dashboard.
 
 ## 31. Frase final de defesa
 

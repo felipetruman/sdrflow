@@ -148,7 +148,7 @@ Sem markdown, sem explicações extras.`
           }
         }
       } catch (llmErr) {
-        console.error('LLM error:', llmErr)
+        console.error('LLM generation failed')
       }
     }
 

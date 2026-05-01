@@ -187,7 +187,7 @@ serve(async (req) => {
         }
       }
     } catch (triggerErr) {
-      console.error('Trigger error:', triggerErr)
+      console.error('Trigger execution failed')
     }
 
     return new Response(

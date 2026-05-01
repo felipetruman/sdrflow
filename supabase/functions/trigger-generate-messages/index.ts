@@ -132,7 +132,7 @@ ${customFieldsText}`
           }
         }
       } catch (llmErr) {
-        console.error('LLM trigger error:', llmErr)
+        console.error('LLM trigger generation failed')
       }
     }
 

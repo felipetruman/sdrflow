@@ -20,8 +20,8 @@ Também cobre segurança, RLS, isolamento por workspace, Edge Functions, UX bás
 * [ ] Testar com pelo menos dois workspaces diferentes.
 * [ ] Testar fluxo feliz.
 * [ ] Testar erros esperados.
-* [✅] Confirmar que nenhuma chave sensível está exposta no frontend.
-* [✅] Confirmar que o README reflete o que realmente foi implementado.
+* [x] Confirmar que nenhuma chave sensível está exposta no frontend.
+* [x] Confirmar que o README reflete o que realmente foi implementado.
 
 **Notas:** o README e o `.env.example` foram ajustados para remover chaves sensíveis do frontend.
 
@@ -33,8 +33,8 @@ Também cobre segurança, RLS, isolamento por workspace, Edge Functions, UX bás
 * [ ] Usuário B.
 * [ ] Workspace A.
 * [ ] Workspace B.
-* [✅] 7 etapas padrão no Workspace A.
-* [✅] 7 etapas padrão no Workspace B.
+* [x] 7 etapas padrão no Workspace A.
+* [x] 7 etapas padrão no Workspace B.
 * [ ] 3 leads no Workspace A.
 * [ ] 2 leads no Workspace B.
 * [ ] 2 campanhas no Workspace A.
@@ -87,7 +87,7 @@ Também cobre segurança, RLS, isolamento por workspace, Edge Functions, UX bás
 
 * [ ] Workspace é criado.
 * [ ] Usuário vira membro admin.
-* [✅] Etapas padrão são criadas automaticamente.
+* [x] Etapas padrão são criadas automaticamente.
 * [ ] Usuário é redirecionado para dashboard.
 * [ ] Nome do workspace aparece no layout.
 
@@ -118,16 +118,16 @@ As seguintes etapas existem, em ordem:
 
 Confirmar RLS ativo em:
 
-* [✅] `workspaces`
-* [✅] `workspace_members`
-* [✅] `funnel_stages`
-* [✅] `leads`
-* [✅] `custom_fields`
-* [✅] `lead_custom_values`
-* [✅] `stage_required_fields`
-* [✅] `campaigns`
-* [✅] `generated_messages`
-* [✅] `lead_activities`
+* [x] `workspaces`
+* [x] `workspace_members`
+* [x] `funnel_stages`
+* [x] `leads`
+* [x] `custom_fields`
+* [x] `lead_custom_values`
+* [x] `stage_required_fields`
+* [x] `campaigns`
+* [x] `generated_messages`
+* [x] `lead_activities`
 
 ### 6.2 Usuário sem membership não acessa dados
 
@@ -137,16 +137,16 @@ Confirmar RLS ativo em:
 
 ### 6.3 Edge Functions
 
-* [✅] `generate-messages` valida token de autenticação.
-* [✅] `move-lead-stage` valida token de autenticação.
-* [✅] `send-message-simulated` valida token de autenticação.
-* [✅] As funções checam membership no workspace antes de processar.
+* [x] `generate-messages` valida token de autenticação.
+* [x] `move-lead-stage` valida token de autenticação.
+* [x] `send-message-simulated` valida token de autenticação.
+* [x] As funções checam membership no workspace antes de processar.
 
 ### 6.4 `.env.example`
 
-* [✅] Contém apenas variáveis públicas/anon necessárias no frontend.
-* [✅] Não inclui `SUPABASE_SERVICE_ROLE_KEY`.
-* [✅] Não inclui `LLM_API_KEY`.
+* [x] Contém apenas variáveis públicas/anon necessárias no frontend.
+* [x] Não inclui `SUPABASE_SERVICE_ROLE_KEY`.
+* [x] Não inclui `LLM_API_KEY`.
 
 ---
 
@@ -156,7 +156,7 @@ Confirmar RLS ativo em:
 * [ ] Editar lead.
 * [ ] Excluir lead.
 * [ ] Listar leads do workspace.
-* [✅] Drag-and-drop no Kanban move o lead entre etapas.
+* [x] Drag-and-drop no Kanban move o lead entre etapas.
 
 ---
 
@@ -174,25 +174,25 @@ Confirmar RLS ativo em:
 * [ ] Criar campanha.
 * [ ] Editar campanha.
 * [ ] Gerar mensagens com IA.
-* [✅] Fallback funciona quando a chave de IA não está configurada.
-* [✅] Mensagens são salvas em `generated_messages`.
+* [x] Fallback funciona quando a chave de IA não está configurada.
+* [x] Mensagens são salvas em `generated_messages`.
 
 ---
 
 ## 10. Testes de envio simulado
 
 * [ ] Simular envio de mensagem.
-* [✅] Lead pode ser movido automaticamente para `Tentando Contato`.
-* [✅] Histórico registra o envio.
+* [x] Lead pode ser movido automaticamente para `Tentando Contato`.
+* [x] Histórico registra o envio.
 
 ---
 
 ## 11. Testes de dashboard
 
-* [✅] Total de leads aparece.
-* [✅] Total de campanhas ativas aparece.
-* [✅] Total de mensagens geradas aparece.
-* [✅] Total de mensagens enviadas aparece.
+* [x] Total de leads aparece.
+* [x] Total de campanhas ativas aparece.
+* [x] Total de mensagens geradas aparece.
+* [x] Total de mensagens enviadas aparece.
 
 ---
 
