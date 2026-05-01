@@ -1519,7 +1519,7 @@ Priorizar telas essenciais e componentes reaproveitáveis.
 * [x] GitHub.
 * [x] Deploy.
 * [x] README.
-* [x] Vídeo de até 10 minutos.
+* [ ] Vídeo de até 10 minutos.
 
 ### Diferenciais selecionados
 
