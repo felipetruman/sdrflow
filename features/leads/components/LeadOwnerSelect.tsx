@@ -15,7 +15,7 @@ export function LeadOwnerSelect({ value = '', onChange }: Props) {
 
   useEffect(() => {
     void getWorkspaceMembers().then((items) => {
-      setMembers(items.map((item) => ({ id: item.user_id, label: item.user_id })))
+      setMembers(items.map((item) => ({ id: item.user_id, label: item.label })))
     })
   }, [])
 
