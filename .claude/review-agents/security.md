@@ -45,6 +45,32 @@ Produce a JSON array of findings. Each finding MUST have:
 
 Categories: `hardcoded-secret`, `sql-injection`, `xss`, `csrf`, `auth-bypass`, `idor`, `data-exposure`, `input-validation`, `misconfiguration`, `dependency`, `other`
 
+## Example
+
+Input: a diff adding `const data = await db.query("SELECT * FROM leads WHERE workspace_id = " + req.params.id)` in an Express route
+
+Output:
+```json
+[
+  {
+    "severity": "CRITICAL",
+    "file": "src/features/leads/routes.ts",
+    "line": 14,
+    "suggestion": "SQL injection via string concatenation — use parameterized query: db.query('SELECT * FROM leads WHERE workspace_id = $1', [req.params.id])",
+    "auto_fixable": true,
+    "category": "sql-injection"
+  },
+  {
+    "severity": "HIGH",
+    "file": "src/features/leads/routes.ts",
+    "line": 14,
+    "suggestion": "Add workspace_id authorization check — ensure user belongs to workspace before querying",
+    "auto_fixable": false,
+    "category": "idor"
+  }
+]
+```
+
 ## Rules
 
 - Only flag issues in changed lines, not surrounding context

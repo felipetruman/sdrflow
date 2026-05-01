@@ -42,6 +42,24 @@ Review ONLY the changed files for documentation issues. Focus on:
 
 Categories: `missing-readme`, `missing-jsdoc`, `missing-env-docs`, `breaking-change`, `stale-comment`, `todo-without-issue`, `missing-params-docs`, `missing-api-schema`, `missing-migration-docs`, `missing-config-docs`, `outdated-readme`, `other`
 
+## Example
+
+Input: a diff adding `export function generateMessages(leadId: string, stageId: string): Promise<string[]>` without docs
+
+Output:
+```json
+[
+  {
+    "severity": "HIGH",
+    "file": "src/features/ai-messages/actions.ts",
+    "line": 5,
+    "suggestion": "Add JSDoc documenting params, return type, and AI provider behavior",
+    "auto_fixable": true,
+    "category": "missing-jsdoc"
+  }
+]
+```
+
 ## Rules
 
 - Only flag docs issues for changed files

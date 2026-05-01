@@ -43,6 +43,24 @@ Review ONLY the changed files for test coverage gaps. Focus on:
 
 Categories: `missing-test-file`, `missing-e2e`, `missing-unit-test`, `missing-integration`, `untested-error-path`, `untested-edge-case`, `missing-schema-test`, `missing-rls-test`, `happy-path-only`, `mock-without-assertion`, `test-cleanup`, `missing-feature-test`, `other`
 
+## Example
+
+Input: a diff adding `export async function moveLeadToStage(leadId: string, stageId: string) { ... }` without a test file
+
+Output:
+```json
+[
+  {
+    "severity": "HIGH",
+    "file": "src/features/leads/actions.ts",
+    "line": 12,
+    "suggestion": "Add unit test for moveLeadToStage covering success, invalid stage, and unauthorized cases",
+    "auto_fixable": false,
+    "category": "missing-unit-test"
+  }
+]
+```
+
 ## Rules
 
 - Only flag coverage gaps for changed files

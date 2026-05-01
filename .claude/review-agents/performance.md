@@ -44,6 +44,24 @@ Review ONLY the changed files for performance issues. Focus on:
 
 Categories: `n-plus-1`, `missing-pagination`, `unbounded-query`, `unnecessary-rerender`, `bundle-size`, `missing-suspense`, `client-vs-server`, `missing-memoization`, `image-optimization`, `caching`, `waterfall-requests`, `memory-leak`, `state-management`, `other`
 
+## Example
+
+Input: a diff adding `const { data: leads } = await supabase.from('leads').select('*')` without LIMIT
+
+Output:
+```json
+[
+  {
+    "severity": "HIGH",
+    "file": "src/features/leads/queries/getLeads.ts",
+    "line": 8,
+    "suggestion": "Add pagination with .limit(50) and .offset() to prevent unbounded query",
+    "auto_fixable": false,
+    "category": "unbounded-query"
+  }
+]
+```
+
 ## Rules
 
 - Only flag issues in changed lines

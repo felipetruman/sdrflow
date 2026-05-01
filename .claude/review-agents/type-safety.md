@@ -45,6 +45,24 @@ Review ONLY the changed files for TypeScript type safety issues. Focus on:
 
 Categories: `any-type`, `non-null-assertion`, `type-assertion`, `missing-return-type`, `implicit-any`, `unsafe-narrowing`, `null-check`, `generic-constraint`, `ts-ignore`, `unhandled-promise`, `return-mismatch`, `missing-type-export`, `zod-inference`, `supabase-types`, `other`
 
+## Example
+
+Input: a diff adding `const result = await supabase.from('leads').select('*').eq('id', id) as { data: Lead | null; error: unknown }`
+
+Output:
+```json
+[
+  {
+    "severity": "CRITICAL",
+    "file": "src/features/leads/actions.ts",
+    "line": 15,
+    "suggestion": "Remove unsafe `as` cast — use Supabase generic typing: .select<string, Lead>('*')",
+    "auto_fixable": true,
+    "category": "type-assertion"
+  }
+]
+```
+
 ## Rules
 
 - Only flag issues in changed lines

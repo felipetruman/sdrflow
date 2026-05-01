@@ -4,18 +4,19 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: pr-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
   pull-requests: write
   checks: write
 
-env:
-  GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
-
 jobs:
-  # ── Phase 1: Spawn 6 parallel reviewers via Gemini ────────────
   review:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
@@ -31,10 +32,32 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Detect diff range
+        id: diff
+        run: |
+          if [ "${{ github.event.action }}" = "synchronize" ]; then
+            echo "range=${{ github.event.before }}..${{ github.event.after }}" >> $GITHUB_OUTPUT
+          else
+            echo "range=$(git merge-base origin/${{ github.base_ref }} HEAD)..HEAD" >> $GITHUB_OUTPUT
+          fi
+          FILES=$(git diff ${{ steps.diff.outputs.range }} --name-only || git diff origin/${{ github.base_ref }}...HEAD --name-only)
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Run ${{ matrix.reviewer }} reviewer (Gemini)
+        timeout-minutes: 3
         env:
           REVIEWER: ${{ matrix.reviewer }}
-          BASE_REF: ${{ github.base_ref }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          DIFF_RANGE: ${{ steps.diff.outputs.range }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
         run: node .claude/review-agents/gemini-reviewer.mjs
 
       - name: Upload review results
@@ -44,7 +67,6 @@ jobs:
           path: .claude/review-results/${{ matrix.reviewer }}.json
           retention-days: 7
 
-  # ── Phase 2: Coordinate results ───────────────────────────────
   coordinate:
     needs: review
     runs-on: ubuntu-latest
@@ -78,5 +100,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: review-metrics
-          path: .claude/review-metrics.json
+          path: |
+            .claude/review-metrics.json
+            .claude/review-results/badge.json
           retention-days: 30
