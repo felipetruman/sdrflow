@@ -11,7 +11,7 @@ export function LeadDetailHeader({ leadId, stages }: { leadId: string; stages: F
   const [editing, setEditing] = useState(false)
   useEffect(() => { void getLeadById(leadId).then(setLead) }, [leadId])
   if (!lead) return <div className="rounded-xl border p-4">Carregando...</div>
-  if (editing) return <LeadForm mode="edit" leadId={leadId} stages={stages} defaultValues={{ ...lead, email: lead.email ?? '', phone: lead.phone ?? '', company: lead.company ?? '', job_title: lead.job_title ?? '', source: lead.source ?? '', notes: lead.notes ?? '', owner_id: lead.owner_id ?? '' }} onSuccess={() => setEditing(false)} />
+  if (editing) return <LeadForm mode="edit" leadId={leadId} stages={stages} defaultValues={{ ...lead, email: lead.email ?? '', phone: lead.phone ?? '', company: lead.company ?? '', job_title: lead.job_title ?? '', source: lead.source ?? '', notes: lead.notes ?? '', owner_id: lead.owner_id ?? '' }} onSuccess={() => { setEditing(false); void getLeadById(leadId).then(setLead) }} />
 
   const stage = stages.find((s) => s.id === lead.stage_id)
 

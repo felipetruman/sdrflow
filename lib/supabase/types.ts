@@ -31,6 +31,7 @@ export interface SupabaseQueryBuilder<T> {
 export interface SupabaseClientLike {
   auth: {
     getUser(): Promise<{ data: { user: { id: string; email?: string | null } | null }; error: SupabaseError | null }>
+    getSession(): Promise<{ data: { session: { user: { id: string; email?: string | null }; access_token: string } | null }; error: SupabaseError | null }>
     signInWithPassword(credentials: { email: string; password: string }): Promise<{ data: unknown; error: SupabaseError | null }>
     signUp(credentials: { email: string; password: string }): Promise<{ data: unknown; error: SupabaseError | null }>
     signOut(): Promise<{ error: SupabaseError | null }>

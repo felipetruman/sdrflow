@@ -9,10 +9,11 @@ import type { Database } from '@/types/database'
 type CreateCampaignResult = { data?: Campaign; error?: string }
 
 async function getCurrentWorkspace(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const { data: authData } = await supabase.auth.getUser()
-  if (!authData.user) return null
+  const { data: sessionData } = await supabase.auth.getSession()
+  const user = sessionData.session?.user
+  if (!user) return null
   type WorkspaceMemberWithWorkspace = { workspaces: Database['public']['Tables']['workspaces']['Row'] | null }
-  const { data, error } = await supabase.from('workspace_members').select('workspaces (*)').eq('user_id', authData.user.id).maybeSingle() as { data: WorkspaceMemberWithWorkspace | null; error: unknown }
+  const { data, error } = await supabase.from('workspace_members').select('workspaces (*)').eq('user_id', user.id).maybeSingle() as { data: WorkspaceMemberWithWorkspace | null; error: unknown }
   if (error) throw error
   return (data?.workspaces as Database['public']['Tables']['workspaces']['Row'] | null) ?? null
 }

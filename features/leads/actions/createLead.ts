@@ -10,8 +10,9 @@ import type { Database } from '@/types/database'
 type CreateLeadResult = { data?: Lead; error?: string }
 
 async function getCurrentWorkspace(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const { data: authData } = await supabase.auth.getUser()
-  if (!authData.user) return null
+  const { data: sessionData } = await supabase.auth.getSession()
+  if (!sessionData.session?.user) return null
+  const authData = { user: sessionData.session.user }
   type WorkspaceMemberWithWorkspace = { workspaces: Database['public']['Tables']['workspaces']['Row'] | null }
   const { data, error } = await supabase.from('workspace_members').select('workspaces (*)').eq('user_id', authData.user.id).maybeSingle() as { data: WorkspaceMemberWithWorkspace | null; error: unknown }
   if (error) throw error
@@ -79,7 +80,8 @@ export async function createLead(data: LeadSchema): Promise<CreateLeadResult> {
   }
   try {
     const supabase = await createClient()
-    const { data: authData } = await supabase.auth.getUser()
+    const { data: sessionData } = await supabase.auth.getSession()
+    const user = sessionData.session?.user
     const workspace = await getCurrentWorkspace(supabase)
     if (!workspace) return { error: 'Workspace atual não encontrado' }
     const payload = {
@@ -93,7 +95,7 @@ export async function createLead(data: LeadSchema): Promise<CreateLeadResult> {
       source: toNullableString(data.source),
       notes: toNullableString(data.notes),
       owner_id: toNullableString(data.owner_id),
-      created_by: authData.user?.id ?? null,
+      created_by: user?.id ?? null,
     }
     const { data: lead, error } = await supabase.from('leads').insert(payload).select().single()
     if (error) throw error
@@ -102,12 +104,11 @@ export async function createLead(data: LeadSchema): Promise<CreateLeadResult> {
     await supabase.from('lead_activities').insert({
       lead_id: leadData.id,
       workspace_id: workspace.id,
-      user_id: authData.user?.id ?? null,
+      user_id: user?.id ?? null,
       type: 'lead_created',
       metadata: { lead_name: leadData.name },
     })
     // Trigger auto-generation for campaigns with this stage as trigger
-    const { data: sessionData } = await (supabase.auth as any).getSession()
     const authHeader = sessionData?.session ? `Bearer ${sessionData.session.access_token}` : undefined
     await triggerAutoGeneration(supabase, leadData.id, data.stage_id, workspace.id, authHeader)
     return { data: lead as Lead }

@@ -9,9 +9,10 @@ export async function getFunnelStages(): Promise<FunnelStage[]> {
   if (isDemoMode()) return DEMO_STAGES
   try {
     const supabase = await createClient()
-    const { data: authData } = await supabase.auth.getUser()
-    if (!authData.user) return []
-    const { data: member } = await supabase.from('workspace_members').select('workspace_id').eq('user_id', authData.user.id).maybeSingle() as { data: { workspace_id: string } | null; error: unknown }
+    const { data: sessionData } = await supabase.auth.getSession()
+    const user = sessionData.session?.user
+    if (!user) return []
+    const { data: member } = await supabase.from('workspace_members').select('workspace_id').eq('user_id', user.id).maybeSingle() as { data: { workspace_id: string } | null; error: unknown }
     if (!member?.workspace_id) return []
     const { data, error } = await supabase.from('funnel_stages').select('*').eq('workspace_id', member.workspace_id).order('order_index', { ascending: true })
     if (error) throw error
