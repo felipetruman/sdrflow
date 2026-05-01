@@ -20,8 +20,6 @@ Revisão estática do código para:
 | Local | Risco | Recomendação |
 |---|---|---|
 | `.env.example` | Alto | Remover `SUPABASE_SERVICE_ROLE_KEY` e `LLM_API_KEY` do arquivo de exemplo. |
-| `supabase/functions/generate-messages/index.ts:151` | Baixo | Evitar `console.error` com objetos completos se puderem conter payload sensível. |
-| `supabase/functions/move-lead-stage/index.ts:190` | Baixo | Mesma recomendação para logs de erro. |
 
 ### Itens verificados sem problema
 
@@ -35,6 +33,8 @@ Revisão estática do código para:
 ## Correções aplicadas
 
 - Removidas as chaves sensíveis do `.env.example`.
+- Sanitizados os `console.error` nas Edge Functions `generate-messages`, `move-lead-stage` e `trigger-generate-messages` para não expor objetos de erro completos.
+- Criada migration `0002_schema_fixes.sql` adicionando `created_by` em `leads`, `user_id` em `lead_activities`, `variation_index` em `generated_messages` e a policy `DELETE` para `generated_messages`.
 - README ajustado para orientar uso correto das variáveis de ambiente.
 - Checklist de QA atualizado para refletir o estado atual.
 
@@ -64,6 +64,7 @@ As funções abaixo validam token de autenticação e membership antes de proces
 - `generate-messages`
 - `move-lead-stage`
 - `send-message-simulated`
+- `trigger-generate-messages`
 
 ### Isolamento por workspace
 
