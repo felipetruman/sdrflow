@@ -4,15 +4,20 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: pr-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
-  contents: write
-  pull-requests: write
-  checks: write
+  contents: read
 
 jobs:
-  # ── Phase 1: Spawn 6 parallel reviewers ──────────────────────────
   review:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      checks: write
     strategy:
       fail-fast: false
       matrix:
@@ -28,42 +33,34 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get diff context
+      - name: Detect diff range
         id: diff
         run: |
-          git fetch origin ${{ github.base_ref }}
-          FILES=$(git diff origin/${{ github.base_ref }}...HEAD --name-only)
-          STAT=$(git diff origin/${{ github.base_ref }}...HEAD --stat)
+          if [ "${{ github.event.action }}" = "synchronize" ]; then
+            RANGE="${{ github.event.before }}..${{ github.event.after }}"
+          else
+            RANGE="$(git merge-base origin/${{ github.base_ref }} HEAD)..HEAD"
+          fi
+          echo "range=$RANGE" >> $GITHUB_OUTPUT
+          FILES=$(git diff "$RANGE" --name-only || git diff origin/${{ github.base_ref }}...HEAD --name-only)
           echo "files<<EOF" >> $GITHUB_OUTPUT
           echo "$FILES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-          echo "stat<<EOF" >> $GITHUB_OUTPUT
-          echo "$STAT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Run ${{ matrix.reviewer }} reviewer
-        uses: anthropics/claude-code-action@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          prompt: |
-            You are the **${{ matrix.reviewer }} reviewer** for a pull request.
-            Read the agent prompt at `.claude/review-agents/${{ matrix.reviewer }}.md` and follow it exactly.
+          node-version: 22
 
-            Changed files:
-            ${{ steps.diff.outputs.files }}
-
-            Diff stat:
-            ${{ steps.diff.outputs.stat }}
-
-            Process:
-            1. Read ONLY the changed files (use git diff to see actual changes)
-            2. Apply your review criteria from the agent prompt
-            3. Output a JSON array of findings to .claude/review-results/${{ matrix.reviewer }}.json
-            4. Each finding: {severity, file, line, suggestion, auto_fixable, category}
-            5. If no findings, output an empty array []
-
-            IMPORTANT: Output ONLY valid JSON. No markdown fences, no commentary outside the JSON.
-          max_turns: 15
+      - name: Run ${{ matrix.reviewer }} reviewer (Gemini)
+        timeout-minutes: 3
+        env:
+          REVIEWER: ${{ matrix.reviewer }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          DIFF_RANGE: ${{ steps.diff.outputs.range }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+        run: node .claude/review-agents/gemini-reviewer.mjs
 
       - name: Upload review results
         uses: actions/upload-artifact@v4
@@ -72,15 +69,17 @@ jobs:
           path: .claude/review-results/${{ matrix.reviewer }}.json
           retention-days: 7
 
-  # ── Phase 2: Coordinate results ──────────────────────────────────
   coordinate:
     needs: review
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.HEALING_PAT || secrets.GITHUB_TOKEN }}
-          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.base_ref }}
 
       - name: Download all review artifacts
         uses: actions/download-artifact@v4
@@ -106,5 +105,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: review-metrics
-          path: .claude/review-metrics.json
+          path: |
+            .claude/review-metrics.json
+            .claude/review-results/badge.json
           retention-days: 30

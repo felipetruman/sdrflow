@@ -10,6 +10,9 @@ export async function updateStageRequiredFields({ stageId, fields }: { stageId: 
     const workspace = await getCurrentWorkspace()
     if (!workspace) return { error: 'Workspace atual não encontrado.' }
 
+    const { data: stage } = await supabase.from('funnel_stages').select('id').eq('id', stageId).eq('workspace_id', workspace.id).maybeSingle()
+    if (!stage) return { error: 'Etapa não encontrada no workspace atual.' }
+
     const { error: deleteError } = await supabase.from('stage_required_fields').delete().eq('stage_id', stageId)
     if (deleteError) throw deleteError
 

@@ -1,23 +1,14 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentWorkspace } from '@/features/workspaces/queries/getCurrentWorkspace'
 import { demoStore, isDemoMode } from '@/lib/demo/data'
 import { getErrorMessage } from '@/lib/utils/errors'
 import type { LeadSchema } from '@/lib/validations/leadSchema'
 import type { Lead } from '@/types/app'
-import type { Database } from '@/types/database'
 
 type CreateLeadResult = { data?: Lead; error?: string }
-
-async function getCurrentWorkspace(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const { data: sessionData } = await supabase.auth.getSession()
-  if (!sessionData.session?.user) return null
-  const authData = { user: sessionData.session.user }
-  type WorkspaceMemberWithWorkspace = { workspaces: Database['public']['Tables']['workspaces']['Row'] | null }
-  const { data, error } = await supabase.from('workspace_members').select('workspaces (*)').eq('user_id', authData.user.id).maybeSingle() as { data: WorkspaceMemberWithWorkspace | null; error: unknown }
-  if (error) throw error
-  return (data?.workspaces as Database['public']['Tables']['workspaces']['Row'] | null) ?? null
-}
 
 const toNullableString = (value: string | undefined | null) => {
   const trimmed = value?.trim()
@@ -37,16 +28,19 @@ async function triggerAutoGeneration(supabase: Awaited<ReturnType<typeof createC
     if (campaignList && campaignList.length > 0) {
       for (const camp of campaignList) {
         if (authHeader) {
+          const controller = new AbortController()
+          const timeout = setTimeout(() => controller.abort(), 5000)
           await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/trigger-generate-messages`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': authHeader },
             body: JSON.stringify({ leadId, campaignId: camp.id }),
-          })
+            signal: controller.signal,
+          }).finally(() => clearTimeout(timeout))
         }
       }
     }
-  } catch {
-    // Silently fail — auto-generation must not block lead creation
+  } catch (err) {
+    console.error('[triggerAutoGeneration]', err)
   }
 }
 
@@ -82,7 +76,7 @@ export async function createLead(data: LeadSchema): Promise<CreateLeadResult> {
     const supabase = await createClient()
     const { data: sessionData } = await supabase.auth.getSession()
     const user = sessionData.session?.user
-    const workspace = await getCurrentWorkspace(supabase)
+    const workspace = await getCurrentWorkspace()
     if (!workspace) return { error: 'Workspace atual não encontrado' }
     const payload = {
       workspace_id: workspace.id,
@@ -111,6 +105,7 @@ export async function createLead(data: LeadSchema): Promise<CreateLeadResult> {
     // Trigger auto-generation for campaigns with this stage as trigger
     const authHeader = sessionData?.session ? `Bearer ${sessionData.session.access_token}` : undefined
     await triggerAutoGeneration(supabase, leadData.id, data.stage_id, workspace.id, authHeader)
+    revalidatePath('/kanban')
     return { data: lead as Lead }
   } catch (error) {
     return { error: getErrorMessage(error) }

@@ -7,6 +7,6 @@ export async function signUp(input: { email: string; password: string }) {
   if (isDemoMode()) return {}
   const supabase = await createClient()
   const { error } = await supabase.auth.signUp({ email: input.email, password: input.password })
-  if (error) return { error: error.message }
+  if (error) return { error: 'Não foi possível criar a conta. Verifique o e-mail e tente novamente.' }
   return {}
 }

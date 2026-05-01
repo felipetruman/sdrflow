@@ -7,6 +7,6 @@ export async function signIn(input: { email: string; password: string }) {
   if (isDemoMode()) return {}
   const supabase = await createClient()
   const { error } = await supabase.auth.signInWithPassword({ email: input.email, password: input.password })
-  if (error) return { error: error.message }
+  if (error) return { error: 'E-mail ou senha inválidos.' }
   return {}
 }

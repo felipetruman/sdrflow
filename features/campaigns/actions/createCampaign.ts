@@ -1,22 +1,13 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentWorkspace } from '@/features/workspaces/queries/getCurrentWorkspace'
 import { getErrorMessage } from '@/lib/utils/errors'
 import type { CampaignSchema } from '@/lib/validations/campaignSchema'
 import type { Campaign } from '@/types/app'
-import type { Database } from '@/types/database'
 
 type CreateCampaignResult = { data?: Campaign; error?: string }
-
-async function getCurrentWorkspace(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const { data: sessionData } = await supabase.auth.getSession()
-  const user = sessionData.session?.user
-  if (!user) return null
-  type WorkspaceMemberWithWorkspace = { workspaces: Database['public']['Tables']['workspaces']['Row'] | null }
-  const { data, error } = await supabase.from('workspace_members').select('workspaces (*)').eq('user_id', user.id).maybeSingle() as { data: WorkspaceMemberWithWorkspace | null; error: unknown }
-  if (error) throw error
-  return (data?.workspaces as Database['public']['Tables']['workspaces']['Row'] | null) ?? null
-}
 
 const toNullableString = (value?: string | null) => {
   const trimmed = value?.trim()
@@ -26,7 +17,7 @@ const toNullableString = (value?: string | null) => {
 export async function createCampaign(data: CampaignSchema): Promise<CreateCampaignResult> {
   try {
     const supabase = await createClient()
-    const workspace = await getCurrentWorkspace(supabase)
+    const workspace = await getCurrentWorkspace()
     if (!workspace) return { error: 'Workspace atual não encontrado' }
 
     const { data: campaign, error } = await supabase.from('campaigns').insert({
@@ -38,6 +29,7 @@ export async function createCampaign(data: CampaignSchema): Promise<CreateCampai
       status: data.status,
     }).select().single()
     if (error) throw error
+    revalidatePath('/campaigns')
     return { data: campaign as Campaign }
   } catch (error) {
     return { error: getErrorMessage(error) }

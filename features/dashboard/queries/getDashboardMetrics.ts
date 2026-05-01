@@ -31,8 +31,8 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
       supabase.from('leads').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId),
       supabase.from('leads').select('stage_id, stage:funnel_stages(name)').eq('workspace_id', workspaceId),
       supabase.from('campaigns').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId).eq('status', 'active'),
-      supabase.from('generated_messages').select('id', { count: 'exact', head: true }),
-      supabase.from('generated_messages').select('id', { count: 'exact', head: true }).eq('status', 'sent'),
+      supabase.from('generated_messages').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId),
+      supabase.from('generated_messages').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId).eq('status', 'sent'),
     ])) as unknown as [
       { count: number | null },
       { data: unknown[] | null },
@@ -47,7 +47,6 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
 
     return { totalLeads: leads.count ?? 0, leadsByStage: Array.from(leadsByStageMap.values()), activeCampaigns: activeCampaigns.count ?? 0, totalMessagesGenerated: generated.count ?? 0, totalMessagesSent: sent.count ?? 0 }
   } catch (error) {
-    console.error(getErrorMessage(error))
-    return empty
+    throw new Error(getErrorMessage(error))
   }
 }

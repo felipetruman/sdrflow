@@ -44,10 +44,8 @@ test.describe('SDRFlow E2E - Fluxo Completo', () => {
     await page.getByRole('button', { name: 'Salvar' }).click()
 
     await expect(page).toHaveURL(/\/kanban/, { timeout: 10000 })
-    // Aguardar carregamento do kanban
-    await page.waitForTimeout(3000)
+    await expect(page.getByPlaceholder('Buscar por nome, email ou empresa')).toBeVisible()
     await page.getByPlaceholder('Buscar por nome, email ou empresa').fill(leadName)
-    await page.waitForTimeout(1500)
     await expect(page.getByText(leadName)).toBeVisible()
   })
 
@@ -68,13 +66,11 @@ test.describe('SDRFlow E2E - Fluxo Completo', () => {
     // Na pagina de detalhe, clicar em editar
     await expect(page).toHaveURL(/\/leads\//)
     await page.getByRole('button', { name: 'Editar' }).click()
-    await page.waitForTimeout(1000)
-
     // Editar campo
     const notesField = page.getByPlaceholder('Observações')
+    await expect(notesField).toBeVisible()
     await notesField.fill('Observacao editada pelo E2E')
     await page.getByRole('button', { name: 'Salvar' }).click()
-    await page.waitForTimeout(2000)
 
     // Verificar se salvou
     await expect(page.getByText('Observacao editada pelo E2E')).toBeVisible()
@@ -94,9 +90,8 @@ test.describe('SDRFlow E2E - Fluxo Completo', () => {
     await page.getByRole('button', { name: 'Salvar' }).click()
 
     await expect(page).toHaveURL(/\/kanban/, { timeout: 10000 })
-    await page.waitForTimeout(2000)
+    await expect(page.getByPlaceholder('Buscar por nome, email ou empresa')).toBeVisible()
     await page.getByPlaceholder('Buscar por nome, email ou empresa').fill(deleteLeadName)
-    await page.waitForTimeout(1000)
     await expect(page.getByText(deleteLeadName)).toBeVisible()
 
     // Clicar em excluir no card
@@ -104,9 +99,7 @@ test.describe('SDRFlow E2E - Fluxo Completo', () => {
     await page.getByRole('button', { name: /excluir/i }).first().click()
 
     // Verificar que nao esta mais no kanban
-    await page.waitForTimeout(1500)
     await page.getByPlaceholder('Buscar por nome, email ou empresa').fill(deleteLeadName)
-    await page.waitForTimeout(1000)
     await expect(page.getByText(deleteLeadName)).not.toBeVisible()
   })
 
@@ -151,7 +144,7 @@ test.describe('SDRFlow E2E - Fluxo Completo', () => {
     await page.getByRole('button', { name: 'Salvar' }).click()
 
     await expect(page).toHaveURL(/\/kanban/, { timeout: 10000 })
-    await page.waitForTimeout(2000)
+    await expect(page.getByPlaceholder('Buscar por nome, email ou empresa')).toBeVisible()
 
     // Abrir lead
     await page.getByPlaceholder('Buscar por nome, email ou empresa').fill(sendLeadName)
@@ -163,19 +156,18 @@ test.describe('SDRFlow E2E - Fluxo Completo', () => {
     const generateButton = page.getByRole('button', { name: 'Gerar Mensagens' })
     await expect(generateButton).toBeVisible()
     await generateButton.click()
-    await page.waitForTimeout(4000)
+    await expect(page.getByText(/mensagem|variação|Olá|Oi/i).first()).toBeVisible({ timeout: 10000 })
 
     // Clicar em enviar simulado
     const sendButton = page.getByRole('button', { name: /enviar/i }).first()
     await expect(sendButton).toBeVisible()
     await sendButton.click()
-    await page.waitForTimeout(2000)
+    await expect(sendButton).not.toBeVisible({ timeout: 5000 }).catch(() => {})
 
     // Verificar que lead aparece em "Tentando Contato" no Kanban
     await page.goto('/kanban')
-    await page.waitForTimeout(2000)
+    await expect(page.getByPlaceholder('Buscar por nome, email ou empresa')).toBeVisible()
     await page.getByPlaceholder('Buscar por nome, email ou empresa').fill(sendLeadName)
-    await page.waitForTimeout(1000)
     await expect(page.getByText(sendLeadName)).toBeVisible()
   })
 

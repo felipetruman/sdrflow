@@ -1,6 +1,8 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentWorkspace } from '@/features/workspaces/queries/getCurrentWorkspace'
 import { getErrorMessage } from '@/lib/utils/errors'
 import type { CampaignSchema } from '@/lib/validations/campaignSchema'
 import type { Campaign } from '@/types/app'
@@ -16,6 +18,9 @@ const toNullableString = (value?: string | null) => {
 export async function updateCampaign(id: string, data: UpdateCampaignInput): Promise<UpdateCampaignResult> {
   try {
     const supabase = await createClient()
+    const workspace = await getCurrentWorkspace()
+    if (!workspace) return { error: 'Workspace atual não encontrado.' }
+
     const payload = {
       ...(data.name !== undefined ? { name: data.name.trim() } : {}),
       ...(data.context !== undefined ? { context: data.context.trim() } : {}),
@@ -24,8 +29,15 @@ export async function updateCampaign(id: string, data: UpdateCampaignInput): Pro
       ...(data.status !== undefined ? { status: data.status } : {}),
     }
 
-    const { data: campaign, error } = await supabase.from('campaigns').update(payload).eq('id', id).select().single()
+    const { data: campaign, error } = await supabase
+      .from('campaigns')
+      .update(payload)
+      .eq('id', id)
+      .eq('workspace_id', workspace.id)
+      .select()
+      .single()
     if (error) throw error
+    revalidatePath('/campaigns')
     return { data: campaign as Campaign }
   } catch (error) {
     return { error: getErrorMessage(error) }

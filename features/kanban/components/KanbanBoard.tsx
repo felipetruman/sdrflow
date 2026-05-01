@@ -4,6 +4,7 @@ import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core'
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable'
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useToast } from '@/lib/hooks/useToast'
 import Link from 'next/link'
 import { Search, Plus, X } from 'lucide-react'
 import { getKanbanData } from '@/features/kanban/queries/getKanbanData'
@@ -20,6 +21,7 @@ import { LeadForm } from '@/features/leads/components/LeadForm'
 export function KanbanBoard() {
   const sensors = useKanbanDnD()
   const router = useRouter()
+  const { toast } = useToast()
   const [isPending, startTransition] = useTransition()
   const [stages, setStages] = useState<FunnelStage[]>([])
   const [leads, setLeads] = useState<LeadWithStage[]>([])
@@ -30,9 +32,13 @@ export function KanbanBoard() {
   const [isDeleting, setIsDeleting] = useState(false)
 
   const load = async () => {
-    const data = await getKanbanData()
-    setStages(data.stages)
-    setLeads(data.leads)
+    try {
+      const data = await getKanbanData()
+      setStages(data.stages)
+      setLeads(data.leads)
+    } catch {
+      toast.error('Falha ao carregar o Kanban. Tente recarregar a página.')
+    }
   }
 
   useEffect(() => { void load() }, [])
@@ -66,9 +72,13 @@ export function KanbanBoard() {
     const targetStage = stages.find((stage) => stage.id === overId) ?? leads.find((lead) => lead.id === overId)?.stage
     if (!targetStage) return
     startTransition(async () => {
-      await moveLeadStage({ leadId, stageId: targetStage.id })
-      await load()
-      router.refresh()
+      const res = await moveLeadStage({ leadId, stageId: targetStage.id })
+      if (!res.success) {
+        toast.error(res.error ?? 'Erro ao mover lead.')
+      } else {
+        await load()
+        router.refresh()
+      }
     })
   }
 
@@ -96,7 +106,7 @@ export function KanbanBoard() {
           <Link href="/leads/new" className="inline-flex items-center gap-1 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white"><Plus className="h-4 w-4" />Novo Lead</Link>
         </div>
       </div>
-      {totalFiltered === 0 ? <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-500">Nenhum lead encontrado com esses filtros.</div> : <div className="flex gap-4 overflow-x-auto pb-4"><SortableContext items={stages.map((stage) => stage.id)} strategy={rectSortingStrategy}>{leadsByStage.map(({ stage, leads }) => <KanbanColumn key={stage.id} stage={stage} leads={leads} onEditLead={setEditingLead} onDeleteLead={async (lead) => { setIsDeleting(true); const res = await deleteLead({ id: lead.id }); setIsDeleting(false); if (res.error) alert(res.error); else await load(); router.refresh(); }} />)}</SortableContext></div>}
+      {totalFiltered === 0 ? <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-500">Nenhum lead encontrado com esses filtros.</div> : <div className="flex gap-4 overflow-x-auto pb-4"><SortableContext items={stages.map((stage) => stage.id)} strategy={rectSortingStrategy}>{leadsByStage.map(({ stage, leads }) => <KanbanColumn key={stage.id} stage={stage} leads={leads} onEditLead={setEditingLead} onDeleteLead={async (lead) => { setIsDeleting(true); const res = await deleteLead({ id: lead.id }); setIsDeleting(false); if (res.error) toast.error(res.error); else await load(); router.refresh(); }} />)}</SortableContext></div>}
       {isPending ? <p className="mt-3 text-sm text-slate-500">Movendo lead...</p> : null}
       {isDeleting ? <p className="mt-3 text-sm text-slate-500">Excluindo lead...</p> : null}
 

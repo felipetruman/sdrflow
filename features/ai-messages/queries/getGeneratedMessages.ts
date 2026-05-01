@@ -13,7 +13,6 @@ export async function getGeneratedMessages(leadId: string): Promise<GeneratedMes
     if (error) throw error
     return (data ?? []) as GeneratedMessage[]
   } catch (error) {
-    console.error(getErrorMessage(error))
-    return []
+    throw new Error(getErrorMessage(error))
   }
 }

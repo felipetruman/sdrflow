@@ -13,7 +13,6 @@ export async function getLeadActivities(leadId: string): Promise<LeadActivity[]>
     if (error) throw error
     return (data ?? []) as LeadActivity[]
   } catch (error) {
-    console.error(getErrorMessage(error))
-    return []
+    throw new Error(getErrorMessage(error))
   }
 }

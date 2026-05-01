@@ -1,4 +1,4 @@
-import { test } from '@playwright/test'
+import { test, type Page } from '@playwright/test'
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -12,7 +12,7 @@ function append(line: string) {
   fs.appendFileSync(logFile, line + '\n')
 }
 
-async function capture(page: { screenshot: (args: { path: string; fullPage: boolean }) => Promise<void> }, name: string) {
+async function capture(page: Page, name: string) {
   await page.screenshot({ path: path.join(outDir, `${name}.png`), fullPage: true })
 }
 

@@ -26,7 +26,6 @@ export async function getKanbanData(): Promise<KanbanData> {
 
     return { stages: (stages ?? []) as KanbanData['stages'], leads: (leads ?? []) as KanbanData['leads'] }
   } catch (error) {
-    console.error(getErrorMessage(error))
-    return { stages: [], leads: [] }
+    throw new Error(getErrorMessage(error))
   }
 }

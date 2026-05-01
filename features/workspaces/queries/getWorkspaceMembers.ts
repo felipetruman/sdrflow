@@ -30,8 +30,8 @@ export async function getWorkspaceMembers(): Promise<WorkspaceMember[]> {
 
   if (error || !data) return []
 
-  // Try to fetch user emails via auth admin (requires service_role)
-  let userMap: Record<string, string> = {}
+  // Fetch labels only for the specific members of this workspace (never all tenants)
+  const userMap: Record<string, string> = {}
   try {
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     if (serviceRoleKey) {
@@ -40,13 +40,20 @@ export async function getWorkspaceMembers(): Promise<WorkspaceMember[]> {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         serviceRoleKey,
       )
-      const userIds = (data as { user_id: string }[]).map((m) => m.user_id)
-      const { data: users } = await adminClient.auth.admin.listUsers()
-      if (users?.users) {
-        userMap = Object.fromEntries(
-          users.users.map((u) => [u.id, u.email || u.user_metadata?.name || u.id])
-        )
-      }
+      const memberIds = (data as { user_id: string }[]).map((m) => m.user_id)
+      await Promise.all(
+        memberIds.map(async (userId) => {
+          try {
+            const { data: userResult } = await adminClient.auth.admin.getUserById(userId)
+            if (userResult?.user) {
+              const meta = userResult.user.user_metadata as { name?: string } | undefined
+              userMap[userId] = userResult.user.email || meta?.name || userId
+            }
+          } catch {
+            // keep fallback label for this user
+          }
+        }),
+      )
     }
   } catch {
     // fallback to user_id
