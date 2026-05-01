@@ -2,16 +2,17 @@
 
 import { CSS } from '@dnd-kit/utilities'
 import { useSortable } from '@dnd-kit/sortable'
-import { Briefcase, Building2, Eye, GripVertical, Pencil } from 'lucide-react'
+import { Briefcase, Building2, Eye, GripVertical, Pencil, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import type { LeadWithStage } from '@/types/app'
 
 type Props = {
   lead: LeadWithStage
   onEdit?: (lead: LeadWithStage) => void
+  onDelete?: (lead: LeadWithStage) => void
 }
 
-export function LeadCard({ lead, onEdit }: Props) {
+export function LeadCard({ lead, onEdit, onDelete }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: lead.id })
 
   return (
@@ -37,6 +38,18 @@ export function LeadCard({ lead, onEdit }: Props) {
         >
           <Pencil className="h-3.5 w-3.5" />
           Editar
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (window.confirm(`Tem certeza que deseja excluir "${lead.name}"?`)) {
+              onDelete?.(lead)
+            }
+          }}
+          className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+          Excluir
         </button>
       </div>
     </div>

@@ -14,7 +14,7 @@ O problema que o projeto resolve é a dispersão operacional: leads em planilhas
 
 1. **Cadastro** → usuário cria conta.
 2. **Workspace** → cria ou acessa um workspace da equipe.
-3. **Lead** → cadastra e edita leads.
+3. **Lead** → cadastra, edita e exclui leads.
 4. **Kanban** → arrasta o lead entre etapas do funil.
 5. **Campanha** → configura contexto e gatilhos de abordagem.
 6. **IA** → gera mensagens personalizadas via Edge Function.
@@ -23,30 +23,34 @@ O problema que o projeto resolve é a dispersão operacional: leads em planilhas
 
 ## 3. Tecnologias
 
-- Next.js 15
-- TypeScript
+- Next.js 15 (App Router)
+- TypeScript (strict)
 - Tailwind CSS
-- Supabase
-- dnd-kit
-- React Hook Form
-- Zod
-- lucide-react
+- Supabase (Auth, Postgres, RLS, Edge Functions)
+- dnd-kit (Kanban drag-and-drop)
+- React Hook Form + Zod (formulários)
+- lucide-react (ícones)
 
 ## 4. Funcionalidades Implementadas
 
-- [✅] Auth (cadastro/login/logout)
-- [✅] Workspaces com multi-tenancy
-- [✅] Leads CRUD
-- [✅] Kanban drag-and-drop
-- [✅] Campos personalizados
+- [✅] Auth (cadastro/login/logout) com redesign enterprise split-screen
+- [✅] Workspaces com multi-tenancy e onboarding automático
+- [✅] Leads CRUD completo (criar, editar, excluir)
+- [✅] Kanban drag-and-drop com filtros, busca e ordenação
+- [✅] Campos personalizados por workspace
 - [✅] Regras de campos obrigatórios por etapa
-- [✅] Campanhas de abordagem
-- [✅] Geração de mensagens com IA (Edge Function)
-- [✅] Envio simulado com movimentação automática
-- [✅] Histórico de atividades
+- [✅] Campanhas de abordagem com gatilho por etapa
+- [✅] Geração de mensagens com IA (Edge Function + fallback local)
+- [✅] Envio simulado com movimentação automática de etapa
+- [✅] Histórico de atividades do lead
 - [✅] Dashboard com métricas
 - [✅] RLS e isolamento por workspace
-- [✅] Edge Functions
+- [✅] Edge Functions (4 ativas)
+- [✅] Demo mode offline com dados mockados
+- [✅] Design system enterprise (sidebar escura, fonte Inter, paleta slate)
+- [✅] Responsividade mobile
+- [✅] Toasts e estados de loading
+- [✅] Testes E2E com Playwright
 
 ## 5. Arquitetura
 
@@ -55,6 +59,8 @@ O projeto segue uma estrutura orientada a features, separando domínios como aut
 - **Feature-based folders**: cada área concentra actions, queries, componentes e schemas.
 - **Multi-tenancy por workspace**: todo dado pertence a um `workspace_id`.
 - **RLS**: o banco aplica políticas para impedir acesso fora do workspace.
+- **Server Actions**: todas as mutations usam Next.js Server Actions.
+- **Edge Functions**: lógica de IA roda no edge do Supabase (Deno).
 
 ## 6. Banco de Dados
 
@@ -96,7 +102,7 @@ cp .env.example .env.local
 ```
 
 2. Configure as variáveis do Supabase em `.env.local`.
-3. Se não quiser conectar ao Supabase ainda, rode em **demo mode**: a UI pode carregar com dados simulados/fallbacks, mas as ações persistentes dependem do backend configurado.
+3. Se não quiser conectar ao Supabase ainda, rode em **demo mode**: a UI carrega com dados simulados/fallbacks. As ações persistentes dependem do backend configurado.
 4. Aplique as migrations no projeto do Supabase.
 5. Inicie a aplicação:
 
@@ -107,7 +113,7 @@ pnpm dev
 ## 10. Variáveis de Ambiente
 
 | Variável | Obrigatória | Descrição |
-|---|---:|---|
+|---|---:|:---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Sim | URL pública do projeto Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Sim | Chave pública/anon para o frontend |
 | `NEXT_PUBLIC_APP_URL` | Sim | URL base da aplicação local ou produção |
@@ -118,6 +124,7 @@ pnpm dev
 
 ## 11. Deploy
 
+- **Produção**: [https://sdrflow.vercel.app](https://sdrflow.vercel.app)
 - **Vercel**: conecte o repositório, configure as variáveis públicas e faça deploy.
 - **Supabase**: aplique schema, policies, Edge Functions e variáveis secretas no dashboard.
 
@@ -129,7 +136,7 @@ Este projeto contou com apoio de **Claude Code**, **Codex** e **OpenCode** duran
 
 - [✅] Autenticação funcionando
 - [✅] Workspace com multi-tenancy
-- [✅] Leads CRUD
+- [✅] Leads CRUD completo
 - [✅] Kanban com drag-and-drop
 - [✅] Campos personalizados
 - [✅] Regras por etapa
@@ -141,6 +148,8 @@ Este projeto contou com apoio de **Claude Code**, **Codex** e **OpenCode** duran
 - [✅] Edge Functions ativas
 - [✅] README documentando o projeto
 - [✅] Checklist de QA mantido
+- [✅] Landing page
+- [✅] Design system enterprise
 
 ## 14. Screenshots
 

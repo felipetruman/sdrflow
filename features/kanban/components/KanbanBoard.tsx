@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { Search, Plus, X } from 'lucide-react'
 import { getKanbanData } from '@/features/kanban/queries/getKanbanData'
 import { moveLeadStage } from '@/features/kanban/actions/moveLeadStage'
+import { deleteLead } from '@/features/leads/actions/deleteLead'
 import { useKanbanDnD } from '@/features/kanban/hooks/useKanbanDnD'
 import type { FunnelStage, LeadWithStage } from '@/types/app'
 import { KanbanColumn } from './KanbanColumn'
@@ -26,6 +27,7 @@ export function KanbanBoard() {
   const [stageFilter, setStageFilter] = useState('')
   const [sortBy, setSortBy] = useState('recentes')
   const [editingLead, setEditingLead] = useState<LeadWithStage | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const load = async () => {
     const data = await getKanbanData()
@@ -94,8 +96,9 @@ export function KanbanBoard() {
           <Link href="/leads/new" className="inline-flex items-center gap-1 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white"><Plus className="h-4 w-4" />Novo Lead</Link>
         </div>
       </div>
-      {totalFiltered === 0 ? <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-500">Nenhum lead encontrado com esses filtros.</div> : <div className="flex gap-4 overflow-x-auto pb-4"><SortableContext items={stages.map((stage) => stage.id)} strategy={rectSortingStrategy}>{leadsByStage.map(({ stage, leads }) => <KanbanColumn key={stage.id} stage={stage} leads={leads} onEditLead={setEditingLead} />)}</SortableContext></div>}
+      {totalFiltered === 0 ? <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-500">Nenhum lead encontrado com esses filtros.</div> : <div className="flex gap-4 overflow-x-auto pb-4"><SortableContext items={stages.map((stage) => stage.id)} strategy={rectSortingStrategy}>{leadsByStage.map(({ stage, leads }) => <KanbanColumn key={stage.id} stage={stage} leads={leads} onEditLead={setEditingLead} onDeleteLead={async (lead) => { setIsDeleting(true); const res = await deleteLead({ id: lead.id }); setIsDeleting(false); if (res.error) alert(res.error); else await load(); router.refresh(); }} />)}</SortableContext></div>}
       {isPending ? <p className="mt-3 text-sm text-slate-500">Movendo lead...</p> : null}
+      {isDeleting ? <p className="mt-3 text-sm text-slate-500">Excluindo lead...</p> : null}
 
       <Modal
         open={Boolean(editingLead)}

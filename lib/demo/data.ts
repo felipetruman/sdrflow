@@ -77,6 +77,7 @@ export const demoStore = {
   addLead: (lead: Lead) => { state.leads.unshift(lead); return lead },
   updateLead: (id: string, payload: Partial<Lead>) => { const lead = state.leads.find((item) => item.id === id); if (!lead) return null; Object.assign(lead, payload, { updated_at: new Date().toISOString() }); return lead },
   moveLeadStage: (id: string, stageId: string) => { const lead = state.leads.find((item) => item.id === id); if (!lead) return null; lead.stage_id = stageId; lead.updated_at = new Date().toISOString(); return lead },
+  deleteLead: (id: string) => { const index = state.leads.findIndex((item) => item.id === id); if (index === -1) return null; state.leads.splice(index, 1); return true },
 }
 
 export const enrichLeadsWithStage = (leads: Lead[]) => leads.map((lead) => ({ ...lead, stage: state.stages.find((stage) => stage.id === lead.stage_id) ?? state.stages[0] })) as LeadWithStage[]

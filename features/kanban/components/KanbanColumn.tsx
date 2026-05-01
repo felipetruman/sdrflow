@@ -8,9 +8,10 @@ type Props = {
   stage: FunnelStage
   leads: LeadWithStage[]
   onEditLead?: (lead: LeadWithStage) => void
+  onDeleteLead?: (lead: LeadWithStage) => void
 }
 
-export function KanbanColumn({ stage, leads, onEditLead }: Props) {
+export function KanbanColumn({ stage, leads, onEditLead, onDeleteLead }: Props) {
   return (
     <div className="flex w-full min-w-[280px] flex-col rounded-2xl bg-slate-50 p-4">
       <div className="mb-4 flex items-center justify-between">
@@ -19,7 +20,7 @@ export function KanbanColumn({ stage, leads, onEditLead }: Props) {
       </div>
       <SortableContext items={leads.map((lead) => lead.id)} strategy={verticalListSortingStrategy}>
         <div className="flex flex-1 flex-col gap-3">
-          {leads.map((lead) => <LeadCard key={lead.id} lead={lead} onEdit={onEditLead} />)}
+          {leads.map((lead) => <LeadCard key={lead.id} lead={lead} onEdit={onEditLead} onDelete={onDeleteLead} />)} 
         </div>
       </SortableContext>
     </div>
