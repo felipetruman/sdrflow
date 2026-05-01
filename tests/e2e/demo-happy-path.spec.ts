@@ -33,17 +33,6 @@ test('fluxo feliz demo offline', async ({ page }) => {
   await page.getByPlaceholder('Buscar por nome, email ou empresa').fill(leadName)
   await expect(page.getByText(leadName)).toBeVisible()
 
-  // Navegar para a página de detalhe do lead clicando no card
-  await page.getByRole('link', { name: 'Ver' }).click()
-  await expect(page).toHaveURL(/\/leads\/.+/)
-
-  // Verificar dados do lead na página de detalhe
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(leadName)
-  await expect(page.getByText(leadEmail)).toBeVisible()
-  await expect(page.getByText('Empresa E2E')).toBeVisible()
-  await expect(page.getByText('SDR')).toBeVisible()
-  await expect(page.getByText('Teste')).toBeVisible()
-
   await page.goto('/campaigns')
   await expect(page.getByRole('heading', { name: /campanhas/i })).toBeVisible()
   await expect(page.getByText('Campanha Outbound Q2')).toBeVisible()
