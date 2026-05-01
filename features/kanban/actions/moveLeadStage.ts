@@ -17,8 +17,9 @@ export interface MoveLeadStageResult {
 
 export async function moveLeadStage({ leadId, stageId }: MoveLeadStageInput): Promise<MoveLeadStageResult> {
   if (isDemoMode()) {
-    demoStore.moveLeadStage(leadId, stageId)
-    return { success: true }
+    const result = demoStore.moveLeadStage(leadId, stageId)
+    if (result && typeof result === 'object' && 'success' in result) return result as MoveLeadStageResult
+    return { success: false, error: 'Lead não encontrado.' }
   }
   try {
     const missingFields = [!leadId ? 'leadId' : null, !stageId ? 'stageId' : null].filter(Boolean) as string[]

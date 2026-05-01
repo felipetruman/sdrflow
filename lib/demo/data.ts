@@ -34,6 +34,16 @@ export const DEMO_CUSTOM_FIELDS: CustomField[] = [
   { id: 'field-produto', workspace_id: DEMO_WORKSPACE.id, name: 'Produto de Interesse', key: 'produto_interesse', field_type: 'text', options: null, created_at: iso(55), updated_at: iso(1) },
 ]
 
+export const DEMO_STAGE_REQUIRED_FIELDS = [
+  { id: 'stage-required-1', workspace_id: DEMO_WORKSPACE.id, stage_id: '66666666-6666-4666-8666-666666666666', field_key: 'company', is_custom_field: false, created_at: iso(40) },
+  { id: 'stage-required-2', workspace_id: DEMO_WORKSPACE.id, stage_id: '66666666-6666-4666-8666-666666666666', field_key: 'job_title', is_custom_field: false, created_at: iso(40) },
+  { id: 'stage-required-3', workspace_id: DEMO_WORKSPACE.id, stage_id: '77777777-7777-4777-8777-777777777777', field_key: 'segmento', is_custom_field: true, created_at: iso(40) },
+] as const
+
+export const DEMO_LEAD_CUSTOM_VALUES: { id: string; lead_id: string; custom_field_id: string; value: string | null; created_at: string; updated_at: string }[] = [
+  { id: 'lead-custom-1', lead_id: 'lead-5', custom_field_id: 'field-segmento', value: 'Serviços', created_at: iso(12), updated_at: iso(1) },
+]
+
 export const DEMO_GENERATED_MESSAGES: GeneratedMessage[] = [
   { id: 'message-1', lead_id: 'lead-5', campaign_id: 'campaign-1', content: 'Juliana, vi que a Vendas Pro está acelerando o time comercial. Posso te mostrar como outras equipes reduziram o tempo de prospecção?', status: 'generated', generation_type: 'manual', sent_at: null, created_at: iso(1), campaign: DEMO_CAMPAIGNS[0] },
   { id: 'message-2', lead_id: 'lead-6', campaign_id: 'campaign-2', content: 'Pedro, retomando nosso papo sobre eficiência operacional: tenho uma ideia rápida para trazer previsibilidade ao pipeline.', status: 'sent', generation_type: 'trigger', sent_at: iso(1), created_at: iso(2), campaign: DEMO_CAMPAIGNS[1] },
@@ -45,8 +55,6 @@ export const DEMO_ACTIVITIES: LeadActivity[] = [
   { id: 'activity-3', lead_id: 'lead-5', workspace_id: DEMO_WORKSPACE.id, type: 'stage_changed', metadata: { from: 'Conexão Iniciada', to: 'Qualificado' }, created_at: iso(1) },
 ]
 
-export const DEMO_LEAD_CUSTOM_VALUES = [] as const
-
 export const isDemoMode = () => !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.USE_DEMO_MODE === 'true'
 
 export type DemoState = {
@@ -55,6 +63,8 @@ export type DemoState = {
   leads: Lead[]
   campaigns: Campaign[]
   customFields: CustomField[]
+  stageRequiredFields: typeof DEMO_STAGE_REQUIRED_FIELDS
+  leadCustomValues: typeof DEMO_LEAD_CUSTOM_VALUES
   activities: LeadActivity[]
   messages: GeneratedMessage[]
 }
@@ -65,6 +75,8 @@ export const createDemoState = (): DemoState => ({
   leads: [...DEMO_LEADS],
   campaigns: [...DEMO_CAMPAIGNS],
   customFields: [...DEMO_CUSTOM_FIELDS],
+  stageRequiredFields: [...DEMO_STAGE_REQUIRED_FIELDS],
+  leadCustomValues: [...DEMO_LEAD_CUSTOM_VALUES],
   activities: [...DEMO_ACTIVITIES],
   messages: [...DEMO_GENERATED_MESSAGES],
 })
@@ -76,7 +88,31 @@ export const demoStore = {
   reset: () => Object.assign(state, createDemoState()),
   addLead: (lead: Lead) => { state.leads.unshift(lead); return lead },
   updateLead: (id: string, payload: Partial<Lead>) => { const lead = state.leads.find((item) => item.id === id); if (!lead) return null; Object.assign(lead, payload, { updated_at: new Date().toISOString() }); return lead },
-  moveLeadStage: (id: string, stageId: string) => { const lead = state.leads.find((item) => item.id === id); if (!lead) return null; lead.stage_id = stageId; lead.updated_at = new Date().toISOString(); return lead },
+  moveLeadStage: (id: string, stageId: string) => {
+    const lead = state.leads.find((item) => item.id === id)
+    if (!lead) return null
+
+    const requiredFields = state.stageRequiredFields.filter((field) => field.stage_id === stageId)
+    const missingFields = requiredFields.filter((field) => {
+      if (field.is_custom_field) {
+        const customField = state.customFields.find((custom) => custom.key === field.field_key)
+        if (!customField) return true
+        const customValue = state.leadCustomValues.find((value) => value.lead_id === id && value.custom_field_id === customField.id)?.value
+        return customValue === null || customValue === undefined || customValue === ''
+      }
+
+      const value = lead[field.field_key as keyof Lead]
+      return value === null || value === undefined || value === ''
+    }).map((field) => field.field_key)
+
+    if (missingFields.length) {
+      return { success: false, error: 'Campos obrigatórios faltando', missingFields }
+    }
+
+    lead.stage_id = stageId
+    lead.updated_at = new Date().toISOString()
+    return { success: true }
+  },
   deleteLead: (id: string) => { const index = state.leads.findIndex((item) => item.id === id); if (index === -1) return null; state.leads.splice(index, 1); return true },
 }
 

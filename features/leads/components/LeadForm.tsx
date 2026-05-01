@@ -9,6 +9,7 @@ import { updateLeadCustomValues } from '@/features/leads/actions/updateLeadCusto
 import { getCustomFields } from '@/features/custom-fields/queries/getCustomFields'
 import { getLeadCustomValues } from '@/features/leads/queries/getLeadCustomValues'
 import { DynamicCustomFieldInput } from '@/features/custom-fields/components/DynamicCustomFieldInput'
+import { LeadOwnerSelect } from './LeadOwnerSelect'
 import type { FunnelStage, CustomField } from '@/types/app'
 import { leadSchema, type LeadSchema } from '@/lib/validations/leadSchema'
 
@@ -85,7 +86,7 @@ export function LeadForm({ defaultValues, mode = 'create', leadId, onSuccess, st
         <input {...form.register('company')} placeholder="Empresa" className="rounded-lg border border-slate-300 px-3 py-2" />
         <input {...form.register('job_title')} placeholder="Cargo" className="rounded-lg border border-slate-300 px-3 py-2" />
         <input {...form.register('source')} placeholder="Origem" className="rounded-lg border border-slate-300 px-3 py-2" />
-        <input {...form.register('owner_id')} placeholder="ID do responsável (opcional)" className="rounded-lg border border-slate-300 px-3 py-2" />
+        <LeadOwnerSelect value={form.watch('owner_id') ?? ''} onChange={(value) => form.setValue('owner_id', value)} />
       </div>
       <textarea {...form.register('notes')} placeholder="Observações" className="min-h-28 w-full rounded-lg border border-slate-300 px-3 py-2" />
 

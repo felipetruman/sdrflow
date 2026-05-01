@@ -1,7 +1,14 @@
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowRight, BarChart3, Bot, KanbanSquare, Shield, Users, Zap } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabase = await createClient()
+  const { data } = await supabase.auth.getUser()
+
+  if (data.user) redirect('/dashboard')
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}

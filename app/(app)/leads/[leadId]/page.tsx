@@ -1,5 +1,6 @@
 import { LeadDetailHeader } from '@/features/leads/components/LeadDetailHeader'
 import { GenerateMessagesPanel } from '@/features/ai-messages/components/GenerateMessagesPanel'
+import { MessageHistory } from '@/features/ai-messages/components/MessageHistory'
 import { ActivityTimeline } from '@/features/activities/components/ActivityTimeline'
 import { getFunnelStages } from '@/features/campaigns/queries/getFunnelStages'
 
@@ -14,6 +15,7 @@ export default async function LeadDetailPage({ params }: Props) {
     <div className="space-y-6 p-6">
       <LeadDetailHeader leadId={leadId} stages={stages} />
       <GenerateMessagesPanel leadId={leadId} />
+      <MessageHistory leadId={leadId} />
       <ActivityTimeline leadId={leadId} />
     </div>
   )
