@@ -122,4 +122,8 @@ export interface DashboardMetrics {
   activeCampaigns: number
   totalMessagesGenerated: number
   totalMessagesSent: number
+  leadsLast7Days: number
+  leadsLast30Days: number
+  messagesByCampaign: { campaign_id: string; campaign_name: string; count: number }[]
+  stageConversionRates: { from_stage: string; to_stage: string; rate: number }[]
 }

@@ -13,7 +13,7 @@ import Link from 'next/link'
 const schema = z
   .object({
     email: z.string().email('Informe um e-mail válido'),
-    password: z.string().min(6, 'A senha precisa ter ao menos 6 caracteres'),
+    password: z.string().min(8, 'A senha precisa ter ao menos 8 caracteres'),
     confirmPassword: z.string().min(1, 'Confirme sua senha'),
   })
   .refine((data) => data.password === data.confirmPassword, {

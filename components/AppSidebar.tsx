@@ -11,9 +11,11 @@ import {
   Settings,
   LogOut,
   Zap,
+  UserPlus,
 } from 'lucide-react'
 import { signOut } from '@/features/auth/actions/signOut'
 import { useWorkspace } from '@/features/workspaces/components/WorkspaceGuard'
+import { WorkspaceSwitcher } from '@/features/workspaces/components/WorkspaceSwitcher'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -25,10 +27,11 @@ const navItems = [
 const settingsItems = [
   { href: '/settings/funnel', label: 'Funil', icon: Settings },
   { href: '/settings/fields', label: 'Campos', icon: Settings },
+  { href: '/settings/members', label: 'Membros', icon: UserPlus },
 ]
 
 export function AppSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const workspace = useWorkspace()
+  const { workspace } = useWorkspace()
   const pathname = usePathname()
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
@@ -55,6 +58,7 @@ export function AppSidebar({ open, onClose }: { open: boolean; onClose: () => vo
           <div className="flex-1">
             <div className="text-sm font-semibold text-white">{workspace?.name ?? 'SDRFlow'}</div>
             <div className="text-xs text-slate-500">CRM para SDRs</div>
+            {workspace && <WorkspaceSwitcher current={workspace} />}
           </div>
           <button className="md:hidden" onClick={onClose}>
             <X className="h-5 w-5" />
