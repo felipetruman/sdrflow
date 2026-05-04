@@ -56,22 +56,30 @@ export function WorkspaceMembersPanel() {
       <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-base)' }}>
         <h3 className="mb-4 font-semibold" style={{ color: 'var(--text-primary)' }}>Convidar novo membro</h3>
         <form onSubmit={handleInvite} className="flex flex-col gap-3 sm:flex-row">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="E-mail do novo membro"
-            required
-            className="sdr-input flex-1 px-3 py-2 text-sm"
-          />
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value as 'admin' | 'member')}
-            className="sdr-input px-3 py-2 text-sm"
-          >
-            <option value="member">Membro</option>
-            <option value="admin">Administrador</option>
-          </select>
+          <div className="flex-1">
+            <label htmlFor="invite-email" className="sr-only">E-mail do novo membro</label>
+            <input
+              id="invite-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="E-mail do novo membro"
+              required
+              className="sdr-input w-full px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label htmlFor="invite-role" className="sr-only">Papel do novo membro</label>
+            <select
+              id="invite-role"
+              value={role}
+              onChange={(e) => setRole(e.target.value as 'admin' | 'member')}
+              className="sdr-input px-3 py-2 text-sm"
+            >
+              <option value="member">Membro</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
           <button
             type="submit"
             disabled={isPending || !email.trim()}

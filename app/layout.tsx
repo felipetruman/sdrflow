@@ -47,7 +47,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased" style={{ backgroundColor: '#070D1A', color: '#F1F5F9' }}>
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

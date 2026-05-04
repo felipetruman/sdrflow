@@ -8,6 +8,7 @@ const createChain = <T>(table: string): SupabaseQueryBuilder<T> => {
     eq: () => chain,
     in: () => chain,
     order: () => chain,
+    limit: () => chain,
     maybeSingle: async () => ({
       data: table === 'workspace_members' ? ({ workspace_id: demoStore.getState().workspace.id, workspaces: demoStore.getState().workspace } as unknown as T) : null,
       error: null,

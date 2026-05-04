@@ -98,12 +98,6 @@ export function LoginForm() {
           </div>
         )}
 
-        <div className="text-right">
-          <Link href="/login" className="text-xs font-medium hover:underline" style={{ color: 'var(--amber)' }}>
-            Esqueceu a senha?
-          </Link>
-        </div>
-
         <button
           type="submit"
           disabled={isSubmitting}
