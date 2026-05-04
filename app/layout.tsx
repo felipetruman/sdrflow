@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Syne, DM_Sans, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
+import { Analytics } from '@vercel/analytics/next'
 
 const syne = Syne({
   subsets: ['latin'],
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-ink-950 text-paper font-sans antialiased">
         {children}
         <Toaster />
+        <Analytics />
       </body>
     </html>
   )
