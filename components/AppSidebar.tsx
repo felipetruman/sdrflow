@@ -6,12 +6,13 @@ import {
   X,
   LayoutDashboard,
   KanbanSquare,
-  Columns3,
   Users,
-  Settings,
   LogOut,
   Zap,
   UserPlus,
+  Megaphone,
+  GitBranch,
+  Sliders,
 } from 'lucide-react'
 import { signOut } from '@/features/auth/actions/signOut'
 import { useWorkspace } from '@/features/workspaces/components/WorkspaceGuard'
@@ -20,14 +21,14 @@ import { WorkspaceSwitcher } from '@/features/workspaces/components/WorkspaceSwi
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/kanban',    label: 'Kanban',    icon: KanbanSquare },
-  { href: '/leads/new', label: 'Novo Lead', icon: Users },
-  { href: '/campaigns', label: 'Campanhas', icon: Columns3 },
+  { href: '/leads/new', label: 'Novo Lead', icon: UserPlus },
+  { href: '/campaigns', label: 'Campanhas', icon: Megaphone },
 ]
 
 const settingsItems = [
-  { href: '/settings/funnel',  label: 'Funil',   icon: Settings },
-  { href: '/settings/fields',  label: 'Campos',  icon: Settings },
-  { href: '/settings/members', label: 'Membros', icon: UserPlus },
+  { href: '/settings/funnel',  label: 'Funil',   icon: GitBranch },
+  { href: '/settings/fields',  label: 'Campos',  icon: Sliders },
+  { href: '/settings/members', label: 'Membros', icon: Users },
 ]
 
 export function AppSidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -62,9 +63,13 @@ export function AppSidebar({ open, onClose }: { open: boolean; onClose: () => vo
         >
           <div
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
-            style={{ backgroundColor: 'var(--amber)', color: 'var(--text-inverse)' }}
+            style={{
+              backgroundColor: 'var(--amber)',
+              boxShadow: '0 0 12px var(--amber-glow)',
+              color: 'var(--text-inverse)',
+            }}
           >
-            <Zap className="h-4 w-4" />
+            <Zap className="h-3.5 w-3.5" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="font-display text-sm font-bold text-white truncate">
@@ -83,7 +88,7 @@ export function AppSidebar({ open, onClose }: { open: boolean; onClose: () => vo
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-2 py-3 space-y-0.5">
+        <nav className="flex-1 px-2 py-3 space-y-0.5" aria-label="Navegação principal">
           {navItems.map((item) => {
             const active = isActive(item.href)
             const Icon = item.icon
@@ -92,10 +97,8 @@ export function AppSidebar({ open, onClose }: { open: boolean; onClose: () => vo
                 key={item.href}
                 href={item.href}
                 onClick={onClose}
-                className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
-                  active
-                    ? 'text-white'
-                    : 'hover:text-white'
+                className={`flex items-center gap-2.5 rounded-lg py-2 text-sm font-medium transition-all ${
+                  active ? 'text-white' : 'hover:text-white'
                 }`}
                 style={
                   active
@@ -103,12 +106,20 @@ export function AppSidebar({ open, onClose }: { open: boolean; onClose: () => vo
                         backgroundColor: 'var(--bg-elevated)',
                         borderLeft: '2px solid var(--amber)',
                         paddingLeft: '10px',
+                        paddingRight: '12px',
                         color: '#fff',
                       }
-                    : { color: 'var(--text-secondary)' }
+                    : {
+                        color: 'var(--text-secondary)',
+                        paddingLeft: '12px',
+                        paddingRight: '12px',
+                      }
                 }
               >
-                <Icon className="h-4 w-4 shrink-0" />
+                <Icon
+                  className="h-4 w-4 shrink-0"
+                  style={{ color: active ? 'var(--amber)' : undefined }}
+                />
                 {item.label}
               </Link>
             )
@@ -116,7 +127,7 @@ export function AppSidebar({ open, onClose }: { open: boolean; onClose: () => vo
 
           <div className="px-3 pt-5 pb-1">
             <span
-              className="text-[10px] font-semibold uppercase tracking-widest"
+              className="text-[10px] font-bold uppercase tracking-[0.14em]"
               style={{ color: 'var(--text-muted)' }}
             >
               Configurações
@@ -131,7 +142,7 @@ export function AppSidebar({ open, onClose }: { open: boolean; onClose: () => vo
                 key={item.href}
                 href={item.href}
                 onClick={onClose}
-                className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                className={`flex items-center gap-2.5 rounded-lg py-2 text-sm font-medium transition-all ${
                   active ? 'text-white' : 'hover:text-white'
                 }`}
                 style={
@@ -140,12 +151,20 @@ export function AppSidebar({ open, onClose }: { open: boolean; onClose: () => vo
                         backgroundColor: 'var(--bg-elevated)',
                         borderLeft: '2px solid var(--amber)',
                         paddingLeft: '10px',
+                        paddingRight: '12px',
                         color: '#fff',
                       }
-                    : { color: 'var(--text-secondary)' }
+                    : {
+                        color: 'var(--text-secondary)',
+                        paddingLeft: '12px',
+                        paddingRight: '12px',
+                      }
                 }
               >
-                <Icon className="h-4 w-4 shrink-0" />
+                <Icon
+                  className="h-4 w-4 shrink-0"
+                  style={{ color: active ? 'var(--amber)' : undefined }}
+                />
                 {item.label}
               </Link>
             )
