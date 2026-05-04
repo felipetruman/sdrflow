@@ -28,19 +28,22 @@ export async function getWorkspaceMembers(): Promise<WorkspaceMember[]> {
     .select('id, user_id, workspace_id')
     .eq('workspace_id', workspace.id)
 
-  if (error || !data) return []
+  if (error || !data) {
+    if (error) console.error('[getWorkspaceMembers] DB error:', error)
+    return []
+  }
 
   // Fetch labels only for the specific members of this workspace (never all tenants)
   const userMap: Record<string, string> = {}
   try {
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     if (serviceRoleKey) {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      if (!supabaseUrl) return []
+
       const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
-      const adminClient = createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        serviceRoleKey,
-      )
-      const memberIds = (data as { user_id: string }[]).map((m) => m.user_id)
+      const adminClient = createSupabaseClient(supabaseUrl, serviceRoleKey)
+      const memberIds = data.map((m) => m.user_id)
       await Promise.all(
         memberIds.map(async (userId) => {
           try {
@@ -59,7 +62,7 @@ export async function getWorkspaceMembers(): Promise<WorkspaceMember[]> {
     // fallback to user_id
   }
 
-  return (data as Omit<WorkspaceMember, 'label'>[]).map((m) => ({
+  return data.map((m) => ({
     ...m,
     label: userMap[m.user_id] || `Usuário ${m.user_id.slice(0, 8)}`,
   }))

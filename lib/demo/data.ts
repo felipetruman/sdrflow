@@ -55,7 +55,7 @@ export const DEMO_ACTIVITIES: LeadActivity[] = [
   { id: 'activity-3', lead_id: 'lead-5', workspace_id: DEMO_WORKSPACE.id, type: 'stage_changed', metadata: { from: 'Conexão Iniciada', to: 'Qualificado' }, created_at: iso(1) },
 ]
 
-export const isDemoMode = () => !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.USE_DEMO_MODE === 'true'
+export const isDemoMode = () => process.env.USE_DEMO_MODE === 'true'
 
 export type DemoState = {
   workspace: Workspace

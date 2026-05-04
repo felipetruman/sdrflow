@@ -36,7 +36,7 @@ export async function sendSimulatedMessage({ messageId }: { messageId: string })
     const { data: message, error: messageError } = await supabase.from('generated_messages').select('*, lead:leads(*)').eq('id', messageId).single() as { data: GeneratedMessageWithLead | null; error: unknown }
     if (messageError) throw messageError
     if (!message?.lead) return { success: false, error: 'Mensagem ou lead não encontrado' }
-    const { data: stage } = await supabase.from('funnel_stages').select('id').eq('name', 'Tentando Contato').maybeSingle() as { data: { id: string } | null; error: unknown }
+    const { data: stage } = await supabase.from('funnel_stages').select('id').eq('name', 'Tentando Contato').eq('workspace_id', message.lead.workspace_id).maybeSingle() as { data: { id: string } | null; error: unknown }
     if (stage?.id && message?.lead) await supabase.from('leads').update({ stage_id: stage.id }).eq('id', message.lead_id)
     await supabase.from('generated_messages').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', messageId)
     await supabase.from('lead_activities').insert([{ lead_id: message.lead_id, workspace_id: message.lead.workspace_id, type: 'message_generated', metadata: { message_id: messageId } }, { lead_id: message.lead_id, workspace_id: message.lead.workspace_id, type: 'message_sent', metadata: { message_id: messageId } }])

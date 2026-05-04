@@ -10,6 +10,21 @@ export async function updateStageRequiredFields({ stageId, fields }: { stageId: 
     const workspace = await getCurrentWorkspace()
     if (!workspace) return { error: 'Workspace atual não encontrado.' }
 
+    const { data: sessionData } = await supabase.auth.getSession()
+    const user = sessionData.session?.user
+    if (!user) return { error: 'Não autenticado' }
+
+    const { data: myMembership } = await supabase
+      .from('workspace_members')
+      .select('role')
+      .eq('workspace_id', workspace.id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (myMembership?.role !== 'admin') {
+      return { error: 'Apenas administradores podem editar campos obrigatórios' }
+    }
+
     const { data: stage } = await supabase.from('funnel_stages').select('id').eq('id', stageId).eq('workspace_id', workspace.id).maybeSingle()
     if (!stage) return { error: 'Etapa não encontrada no workspace atual.' }
 

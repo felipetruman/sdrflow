@@ -11,10 +11,9 @@ import { getKanbanData } from '@/features/kanban/queries/getKanbanData'
 import { moveLeadStage } from '@/features/kanban/actions/moveLeadStage'
 import { deleteLead } from '@/features/leads/actions/deleteLead'
 import { useKanbanDnD } from '@/features/kanban/hooks/useKanbanDnD'
+import { getWorkspaceMembers } from '@/features/workspaces/queries/getWorkspaceMembers'
 import type { FunnelStage, LeadWithStage } from '@/types/app'
 import { KanbanColumn } from './KanbanColumn'
-import { EmptyState } from '@/components/EmptyState'
-import { Columns3 } from 'lucide-react'
 import { Modal } from '@/components/Modal'
 import { LeadForm } from '@/features/leads/components/LeadForm'
 
@@ -27,7 +26,9 @@ export function KanbanBoard() {
   const [leads, setLeads] = useState<LeadWithStage[]>([])
   const [query, setQuery] = useState('')
   const [stageFilter, setStageFilter] = useState('')
+  const [ownerFilter, setOwnerFilter] = useState('')
   const [sortBy, setSortBy] = useState('recentes')
+  const [members, setMembers] = useState<{ user_id: string; label: string }[]>([])
   const [editingLead, setEditingLead] = useState<LeadWithStage | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -42,13 +43,15 @@ export function KanbanBoard() {
   }
 
   useEffect(() => { void load() }, [])
+  useEffect(() => { void getWorkspaceMembers().then(setMembers) }, [])
 
   const filteredLeads = useMemo(() => leads.filter((lead) => {
     const search = query.trim().toLowerCase()
     const matchesSearch = !search || [lead.name, lead.email, lead.company].filter(Boolean).some((value) => String(value).toLowerCase().includes(search))
     const matchesStage = !stageFilter || lead.stage_id === stageFilter
-    return matchesSearch && matchesStage
-  }), [leads, query, stageFilter])
+    const matchesOwner = !ownerFilter || lead.owner_id === ownerFilter
+    return matchesSearch && matchesStage && matchesOwner
+  }), [leads, query, stageFilter, ownerFilter])
 
   const sortedLeads = useMemo(() => {
     const leadsCopy = [...filteredLeads]
@@ -84,31 +87,105 @@ export function KanbanBoard() {
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-      <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-end md:justify-between">
-        <div className="grid flex-1 gap-3 md:grid-cols-4">
+      <div
+        className="mb-4 flex flex-col gap-3 rounded-xl p-4 md:flex-row md:items-end md:justify-between"
+        style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-dim)' }}
+      >
+        <div className="grid flex-1 gap-2.5 md:grid-cols-5">
           <div className="relative md:col-span-2">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por nome, email ou empresa" className="w-full rounded-lg border border-slate-300 py-2 pl-10 pr-3" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar por nome, email ou empresa"
+              aria-label="Buscar leads"
+              className="sdr-input py-2 pl-10 pr-3"
+            />
           </div>
-          <select value={stageFilter} onChange={(event) => setStageFilter(event.target.value)} className="rounded-lg border border-slate-300 px-3 py-2">
+          <select
+            value={stageFilter}
+            onChange={(e) => setStageFilter(e.target.value)}
+            aria-label="Filtrar por etapa"
+            className="sdr-input px-3 py-2"
+          >
             <option value="">Todas as etapas</option>
             {stages.map((stage) => <option key={stage.id} value={stage.id}>{stage.name}</option>)}
           </select>
-          <select value={sortBy} onChange={(event) => setSortBy(event.target.value)} className="rounded-lg border border-slate-300 px-3 py-2">
+          <select
+            value={ownerFilter}
+            onChange={(e) => setOwnerFilter(e.target.value)}
+            aria-label="Filtrar por responsável"
+            className="sdr-input px-3 py-2"
+          >
+            <option value="">Todos os responsáveis</option>
+            {members.map((m) => <option key={m.user_id} value={m.user_id}>{m.label}</option>)}
+          </select>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            aria-label="Ordenar leads"
+            className="sdr-input px-3 py-2"
+          >
             <option value="recentes">Mais recentes</option>
             <option value="nome">Nome A-Z</option>
             <option value="empresa">Empresa A-Z</option>
           </select>
         </div>
         <div className="flex items-center gap-2">
-          <p className="text-sm text-slate-500">{totalFiltered} leads encontrados</p>
-          <button type="button" onClick={() => { setQuery(''); setStageFilter(''); setSortBy('recentes') }} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700"><X className="h-4 w-4" />Limpar</button>
-          <Link href="/leads/new" className="inline-flex items-center gap-1 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white"><Plus className="h-4 w-4" />Novo Lead</Link>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{totalFiltered} leads encontrados</p>
+          <button
+            type="button"
+            onClick={() => { setQuery(''); setStageFilter(''); setOwnerFilter(''); setSortBy('recentes') }}
+            className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+            style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-base)', backgroundColor: 'var(--bg-elevated)' }}
+          >
+            <X className="h-3.5 w-3.5" />Limpar
+          </button>
+          <Link
+            href="/leads/new"
+            className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors"
+            style={{ backgroundColor: 'var(--amber)', color: 'var(--text-inverse)' }}
+          >
+            <Plus className="h-3.5 w-3.5" />Novo Lead
+          </Link>
         </div>
       </div>
-      {totalFiltered === 0 ? <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-500">Nenhum lead encontrado com esses filtros.</div> : <div className="flex gap-4 overflow-x-auto pb-4"><SortableContext items={stages.map((stage) => stage.id)} strategy={rectSortingStrategy}>{leadsByStage.map(({ stage, leads }) => <KanbanColumn key={stage.id} stage={stage} leads={leads} onEditLead={setEditingLead} onDeleteLead={async (lead) => { setIsDeleting(true); const res = await deleteLead({ id: lead.id }); setIsDeleting(false); if (res.error) toast.error(res.error); else await load(); router.refresh(); }} />)}</SortableContext></div>}
-      {isPending ? <p className="mt-3 text-sm text-slate-500">Movendo lead...</p> : null}
-      {isDeleting ? <p className="mt-3 text-sm text-slate-500">Excluindo lead...</p> : null}
+      {totalFiltered === 0
+        ? (
+          <div
+            className="rounded-xl p-10 text-center text-sm"
+            style={{ border: '1px dashed var(--border-base)', color: 'var(--text-muted)' }}
+          >
+            Nenhum lead encontrado com esses filtros.
+          </div>
+        )
+        : (
+          <div className="flex gap-3 overflow-x-auto pb-4">
+            <SortableContext items={stages.map((s) => s.id)} strategy={rectSortingStrategy}>
+              {leadsByStage.map(({ stage, leads }) => (
+                <KanbanColumn
+                  key={stage.id}
+                  stage={stage}
+                  leads={leads}
+                  onEditLead={setEditingLead}
+                  onDeleteLead={async (lead) => {
+                    setIsDeleting(true)
+                    const res = await deleteLead({ id: lead.id })
+                    setIsDeleting(false)
+                    if (res.error) toast.error(res.error)
+                    else await load()
+                    router.refresh()
+                  }}
+                />
+              ))}
+            </SortableContext>
+          </div>
+        )
+      }
+      <div role="status" aria-live="polite" className="mt-3 text-sm" style={{ color: 'var(--text-muted)', minHeight: '1.25rem' }}>
+        {isPending  ? 'Movendo lead...'   : null}
+        {isDeleting ? 'Excluindo lead...' : null}
+      </div>
 
       <Modal
         open={Boolean(editingLead)}
@@ -123,11 +200,13 @@ export function KanbanBoard() {
             defaultValues={{
               name: editingLead.name,
               email: editingLead.email ?? '',
+              phone: editingLead.phone ?? '',
               company: editingLead.company ?? '',
               job_title: editingLead.job_title ?? '',
               source: editingLead.source ?? '',
               notes: editingLead.notes ?? '',
               stage_id: editingLead.stage_id,
+              owner_id: editingLead.owner_id ?? '',
             }}
             onSuccess={async () => {
               setEditingLead(null)

@@ -13,14 +13,38 @@ type Props = {
 
 export function KanbanColumn({ stage, leads, onEditLead, onDeleteLead }: Props) {
   return (
-    <div className="flex w-full min-w-[280px] flex-col rounded-2xl bg-slate-50 p-4">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-semibold text-slate-900">{stage.name}</h3>
-        <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs text-slate-700">{leads.length}</span>
+    <div
+      data-kanban-column
+      className="flex w-full min-w-[272px] flex-col rounded-xl p-3"
+      style={{
+        backgroundColor: 'var(--bg-surface)',
+        border: '1px solid var(--border-dim)',
+      }}
+    >
+      <div className="mb-3 flex items-center justify-between px-1">
+        <h3
+          className="font-display text-sm font-semibold"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          {stage.name}
+        </h3>
+        <span
+          className="font-mono rounded-md px-2 py-0.5 text-xs font-medium tabular-nums"
+          style={{
+            backgroundColor: 'var(--bg-elevated)',
+            color: leads.length > 0 ? 'var(--amber)' : 'var(--text-muted)',
+            border: '1px solid var(--border-dim)',
+          }}
+        >
+          {leads.length}
+        </span>
       </div>
+
       <SortableContext items={leads.map((lead) => lead.id)} strategy={verticalListSortingStrategy}>
-        <div className="flex flex-1 flex-col gap-3">
-          {leads.map((lead) => <LeadCard key={lead.id} lead={lead} onEdit={onEditLead} onDelete={onDeleteLead} />)} 
+        <div className="flex flex-1 flex-col gap-2">
+          {leads.map((lead) => (
+            <LeadCard key={lead.id} lead={lead} onEdit={onEditLead} onDelete={onDeleteLead} />
+          ))}
         </div>
       </SortableContext>
     </div>
