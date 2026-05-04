@@ -70,6 +70,10 @@
   }
 
   /* Scrollbar */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-bright) var(--bg-surface);
+  }
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;

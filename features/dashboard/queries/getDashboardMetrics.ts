@@ -70,7 +70,7 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
       supabase.from('campaigns').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId).eq('status', 'active'),
       supabase.from('generated_messages').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId),
       supabase.from('generated_messages').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId).eq('status', 'sent'),
-      supabase.from('generated_messages').select('campaign_id, campaign:campaigns(name)').eq('workspace_id', workspaceId).limit(5),
+      supabase.from('generated_messages').select('campaign_id, campaign:campaigns(name)').eq('workspace_id', workspaceId),
       supabase.from('funnel_stages').select('id, name, order_index').eq('workspace_id', workspaceId).order('order_index', { ascending: true }),
     ])) as unknown as [
       { data: null; error: unknown; count: number | null },

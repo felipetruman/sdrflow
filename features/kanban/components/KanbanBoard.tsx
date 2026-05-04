@@ -75,12 +75,16 @@ export function KanbanBoard() {
     const targetStage = stages.find((stage) => stage.id === overId) ?? leads.find((lead) => lead.id === overId)?.stage
     if (!targetStage) return
     startTransition(async () => {
-      const res = await moveLeadStage({ leadId, stageId: targetStage.id })
-      if (!res.success) {
-        toast.error(res.error ?? 'Erro ao mover lead.')
-      } else {
-        await load()
-        router.refresh()
+      try {
+        const res = await moveLeadStage({ leadId, stageId: targetStage.id })
+        if (!res.success) {
+          toast.error(res.error ?? 'Erro ao mover lead.')
+        } else {
+          await load()
+          router.refresh()
+        }
+      } catch {
+        toast.error('Erro inesperado ao mover lead.')
       }
     })
   }
@@ -170,11 +174,18 @@ export function KanbanBoard() {
                   onEditLead={setEditingLead}
                   onDeleteLead={async (lead) => {
                     setIsDeleting(true)
-                    const res = await deleteLead({ id: lead.id })
-                    setIsDeleting(false)
-                    if (res.error) toast.error(res.error)
-                    else await load()
-                    router.refresh()
+                    try {
+                      const res = await deleteLead({ id: lead.id })
+                      if (res.error) toast.error(res.error)
+                      else {
+                        await load()
+                        router.refresh()
+                      }
+                    } catch {
+                      toast.error('Erro inesperado ao excluir lead.')
+                    } finally {
+                      setIsDeleting(false)
+                    }
                   }}
                 />
               ))}

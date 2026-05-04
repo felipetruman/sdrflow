@@ -29,11 +29,18 @@ export async function sendSimulatedMessage({ messageId }: { messageId: string })
   }
   try {
     const supabase = await createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user) return { success: false, error: 'Não autenticado' }
+
+    const { data: memberRow } = await supabase.from('workspace_members').select('workspace_id').eq('user_id', session.user.id).maybeSingle() as { data: { workspace_id: string } | null; error: unknown }
+    if (!memberRow) return { success: false, error: 'Workspace não encontrado' }
+    const workspaceId = memberRow.workspace_id
+
     const result = await supabase.functions.invoke('send-message-simulated', { body: { messageId } })
     if (!result.error) return { success: true }
 
     type GeneratedMessageWithLead = { lead_id: string; lead: { workspace_id: string } | null }
-    const { data: message, error: messageError } = await supabase.from('generated_messages').select('*, lead:leads(*)').eq('id', messageId).single() as { data: GeneratedMessageWithLead | null; error: unknown }
+    const { data: message, error: messageError } = await supabase.from('generated_messages').select('*, lead:leads(*)').eq('id', messageId).eq('workspace_id', workspaceId).single() as { data: GeneratedMessageWithLead | null; error: unknown }
     if (messageError) throw messageError
     if (!message?.lead) return { success: false, error: 'Mensagem ou lead não encontrado' }
     const { data: stage } = await supabase.from('funnel_stages').select('id').eq('name', 'Tentando Contato').eq('workspace_id', message.lead.workspace_id).maybeSingle() as { data: { id: string } | null; error: unknown }

@@ -22,7 +22,7 @@ export async function updatePassword(formData: FormData) {
   const password = formData.get('password') as string
   const confirmPassword = formData.get('confirmPassword') as string
 
-  if (!password || password.length < 6) return { error: 'A senha deve ter pelo menos 6 caracteres.' }
+  if (!password || password.length < 7) return { error: 'A senha deve ter pelo menos 7 caracteres.' }
   if (password !== confirmPassword) return { error: 'As senhas não conferem.' }
 
   if (isDemoMode()) return { success: 'Senha alterada com sucesso.' }
