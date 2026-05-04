@@ -12,5 +12,7 @@ pnpm-debug.log*
 /supabase/.temp
 /playwright-report
 /test-results
+playwright-results.xml
+*.xml
 .vercel
 /images
