@@ -98,12 +98,14 @@ export function KanbanBoard() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar por nome, email ou empresa"
+              aria-label="Buscar leads"
               className="sdr-input py-2 pl-10 pr-3"
             />
           </div>
           <select
             value={stageFilter}
             onChange={(e) => setStageFilter(e.target.value)}
+            aria-label="Filtrar por etapa"
             className="sdr-input px-3 py-2"
           >
             <option value="">Todas as etapas</option>
@@ -112,6 +114,7 @@ export function KanbanBoard() {
           <select
             value={ownerFilter}
             onChange={(e) => setOwnerFilter(e.target.value)}
+            aria-label="Filtrar por responsável"
             className="sdr-input px-3 py-2"
           >
             <option value="">Todos os responsáveis</option>
@@ -120,6 +123,7 @@ export function KanbanBoard() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
+            aria-label="Ordenar leads"
             className="sdr-input px-3 py-2"
           >
             <option value="recentes">Mais recentes</option>
@@ -178,8 +182,10 @@ export function KanbanBoard() {
           </div>
         )
       }
-      {isPending  ? <p className="mt-3 text-sm" style={{ color: 'var(--text-muted)' }}>Movendo lead...</p>   : null}
-      {isDeleting ? <p className="mt-3 text-sm" style={{ color: 'var(--text-muted)' }}>Excluindo lead...</p> : null}
+      <div role="status" aria-live="polite" className="mt-3 text-sm" style={{ color: 'var(--text-muted)', minHeight: '1.25rem' }}>
+        {isPending  ? 'Movendo lead...'   : null}
+        {isDeleting ? 'Excluindo lead...' : null}
+      </div>
 
       <Modal
         open={Boolean(editingLead)}

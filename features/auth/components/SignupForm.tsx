@@ -112,10 +112,7 @@ export function SignupForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all disabled:opacity-50"
-          style={{ backgroundColor: 'var(--amber)', color: 'var(--text-inverse)' }}
-          onMouseEnter={(e) => { if (!isSubmitting) e.currentTarget.style.backgroundColor = 'var(--amber-dim)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--amber)' }}
+          className="btn-amber flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold"
         >
           {isSubmitting ? (
             <><Loader2 className="h-4 w-4 animate-spin" /> Criando conta...</>

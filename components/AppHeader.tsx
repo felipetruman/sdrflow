@@ -15,8 +15,7 @@ export function AppHeader({ onMenuClick }: { onMenuClick: () => void }) {
     >
       <div className="flex items-center gap-3">
         <button
-          className="rounded-lg p-2 transition-colors md:hidden"
-          style={{ color: 'var(--text-secondary)' }}
+          className="header-icon-btn min-h-[44px] min-w-[44px] rounded-lg transition-colors md:hidden"
           onClick={onMenuClick}
           aria-label="Abrir menu"
         >
@@ -32,19 +31,13 @@ export function AppHeader({ onMenuClick }: { onMenuClick: () => void }) {
 
       <div className="flex items-center gap-1">
         <button
-          className="rounded-lg p-2 transition-colors"
-          style={{ color: 'var(--text-muted)' }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--amber)')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
+          className="header-icon-btn rounded-lg p-2.5 transition-colors"
           aria-label="Notificações"
         >
           <Bell className="h-4 w-4" />
         </button>
         <button
-          className="rounded-lg p-2 transition-colors"
-          style={{ color: 'var(--text-muted)' }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--amber)')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
+          className="header-icon-btn rounded-lg p-2.5 transition-colors"
           aria-label="Perfil"
         >
           <User className="h-4 w-4" />

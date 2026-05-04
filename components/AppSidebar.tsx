@@ -78,10 +78,10 @@ export function AppSidebar({ open, onClose }: { open: boolean; onClose: () => vo
             {workspace && <WorkspaceSwitcher current={workspace} />}
           </div>
           <button
-            className="rounded p-1 md:hidden"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded md:hidden"
             style={{ color: 'var(--text-muted)' }}
             onClick={onClose}
-            aria-label="Fechar"
+            aria-label="Fechar menu"
           >
             <X className="h-4 w-4" />
           </button>

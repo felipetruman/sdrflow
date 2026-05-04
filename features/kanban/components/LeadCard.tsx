@@ -59,7 +59,7 @@ export function LeadCard({ lead, onEdit, onDelete }: Props) {
       <div className="flex items-center gap-1.5">
         <Link
           href={`/leads/${lead.id}`}
-          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors"
+          className="inline-flex min-h-[36px] items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors"
           style={{
             backgroundColor: 'var(--bg-overlay)',
             color: 'var(--text-secondary)',
@@ -72,7 +72,7 @@ export function LeadCard({ lead, onEdit, onDelete }: Props) {
         <button
           type="button"
           onClick={() => onEdit?.(lead)}
-          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors"
+          className="inline-flex min-h-[36px] items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors"
           style={{
             backgroundColor: 'var(--bg-overlay)',
             color: 'var(--text-secondary)',
@@ -87,7 +87,7 @@ export function LeadCard({ lead, onEdit, onDelete }: Props) {
           onClick={() => {
             if (window.confirm(`Excluir "${lead.name}"?`)) onDelete?.(lead)
           }}
-          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors"
+          className="inline-flex min-h-[36px] items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors"
           style={{
             backgroundColor: 'rgba(239,68,68,0.08)',
             color: 'var(--error)',
