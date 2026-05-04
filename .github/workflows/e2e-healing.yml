@@ -43,6 +43,9 @@ jobs:
         env:
           USE_DEMO_MODE: 'true'
           PLAYWRIGHT_JSON_OUTPUT_NAME: playwright-report/results.json
+          # Demo mode bypasses real auth; these satisfy the env var check in the fixture
+          E2E_EMAIL: demo@sdrflow.ai
+          E2E_PASSWORD: demo_ci_placeholder
 
       - uses: actions/upload-artifact@v4
         if: always()
