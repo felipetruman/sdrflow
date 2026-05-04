@@ -9,11 +9,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen" style={{ backgroundColor: 'var(--bg-base)' }}>
       <AppSidebar open={open} onClose={() => setOpen(false)} />
-      <div className="flex min-h-screen flex-1 flex-col">
-        <AppHeader onMenuClick={() => setOpen((value) => !value)} />
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+      <div className="flex min-h-screen flex-1 flex-col overflow-hidden">
+        <AppHeader onMenuClick={() => setOpen((v) => !v)} />
+        <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
       </div>
     </div>
   )
