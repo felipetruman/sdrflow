@@ -6,6 +6,7 @@ const createChain = <T>(table: string): SupabaseQueryBuilder<T> => {
     then: (onfulfilled, onrejected) => Promise.resolve({ data: [] as T[] | null, error: null }).then(onfulfilled, onrejected),
     select: () => chain,
     eq: () => chain,
+    in: () => chain,
     order: () => chain,
     maybeSingle: async () => ({
       data: table === 'workspace_members' ? ({ workspace_id: demoStore.getState().workspace.id, workspaces: demoStore.getState().workspace } as unknown as T) : null,

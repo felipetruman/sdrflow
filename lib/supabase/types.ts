@@ -19,6 +19,7 @@ export interface SupabaseQueryBuilder<T> {
   ): PromiseLike<TResult1 | TResult2>
   select(columns?: string, options?: { count?: 'exact'; head?: boolean }): SupabaseQueryBuilder<T>
   eq(column: string, value: string): SupabaseQueryBuilder<T>
+  in(column: string, values: string[]): SupabaseQueryBuilder<T>
   order(column: string, options?: { ascending?: boolean }): SupabaseQueryBuilder<T>
   maybeSingle(): SupabaseQueryResult<T>
   single(): SupabaseQueryResult<T>

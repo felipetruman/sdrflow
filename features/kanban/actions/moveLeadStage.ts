@@ -26,6 +26,9 @@ export async function moveLeadStage({ leadId, stageId }: MoveLeadStageInput): Pr
     if (missingFields.length) return { success: false, error: 'Campos obrigatórios ausentes.', missingFields }
 
     const supabase = await createClient()
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData.session?.user) return { success: false, error: 'Não autenticado' }
+
     const { error: invokeError } = await supabase.functions.invoke('move-lead-stage', { body: { leadId, stageId } })
     if (!invokeError) return { success: true }
 
