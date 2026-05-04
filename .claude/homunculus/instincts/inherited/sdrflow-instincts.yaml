@@ -1,0 +1,319 @@
+# Instincts generated from https://github.com/felipetruman/sdrflow
+# Generated: 2026-05-04T11:21:54.579Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: sdrflow-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/felipetruman/sdrflow
+---
+
+# Sdrflow Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: feat
+
+## Evidence
+
+- 1 commits analyzed
+- Detected conventional commit pattern
+- Examples: feat(ci): E2E autonomous healing workflow
+
+---
+id: sdrflow-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/felipetruman/sdrflow
+---
+
+# Sdrflow Commit Length
+
+## Action
+
+Keep commit messages concise (~41 characters)
+
+## Evidence
+
+- Average commit message length: 41 chars
+- Based on 1 commits
+
+---
+id: sdrflow-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/felipetruman/sdrflow
+---
+
+# Sdrflow Naming Files
+
+## Action
+
+Use kebab-case naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: kebab-case
+
+---
+id: sdrflow-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/felipetruman/sdrflow
+---
+
+# Sdrflow Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: sdrflow-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/felipetruman/sdrflow
+---
+
+# Sdrflow Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: sdrflow-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/felipetruman/sdrflow
+---
+
+# Sdrflow Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: sdrflow-instinct-file-naming
+trigger: "When creating a new file"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: felipetruman/sdrflow
+---
+
+# Sdrflow Instinct File Naming
+
+## Action
+
+Name the file using kebab-case
+
+## Evidence
+
+- Pattern in namingConventions.files
+
+---
+id: sdrflow-instinct-function-naming
+trigger: "When defining a function"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: felipetruman/sdrflow
+---
+
+# Sdrflow Instinct Function Naming
+
+## Action
+
+Use camelCase for the function name
+
+## Evidence
+
+- Pattern in namingConventions.functions
+
+---
+id: sdrflow-instinct-class-naming
+trigger: "When defining a class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: felipetruman/sdrflow
+---
+
+# Sdrflow Instinct Class Naming
+
+## Action
+
+Use PascalCase for the class name
+
+## Evidence
+
+- Pattern in namingConventions.classes
+
+---
+id: sdrflow-instinct-constant-naming
+trigger: "When defining a constant"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: felipetruman/sdrflow
+---
+
+# Sdrflow Instinct Constant Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for the constant name
+
+## Evidence
+
+- Pattern in namingConventions.constants
+
+---
+id: sdrflow-instinct-import-style
+trigger: "When importing modules"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: felipetruman/sdrflow
+---
+
+# Sdrflow Instinct Import Style
+
+## Action
+
+Use relative import paths
+
+## Evidence
+
+- Pattern in importStyle
+
+---
+id: sdrflow-instinct-export-style
+trigger: "When exporting from a module"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: felipetruman/sdrflow
+---
+
+# Sdrflow Instinct Export Style
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in exportStyle
+
+---
+id: sdrflow-instinct-test-location
+trigger: "When adding or updating tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: felipetruman/sdrflow
+---
+
+# Sdrflow Instinct Test Location
+
+## Action
+
+Place test files in a separate directory from source files
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation
+
+---
+id: sdrflow-instinct-git-commit-format
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: felipetruman/sdrflow
+---
+
+# Sdrflow Instinct Git Commit Format
+
+## Action
+
+Use the Conventional Commits format with a prefix such as 'feat'
+
+## Evidence
+
+- Pattern in commits.type
+- Example: 'feat(ci): E2E autonomous healing workflow'
+
+---
+id: sdrflow-instinct-git-commit-length
+trigger: "When composing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: felipetruman/sdrflow
+---
+
+# Sdrflow Instinct Git Commit Length
+
+## Action
+
+Keep the commit message concise, around 41 characters on average
+
+## Evidence
+
+- Pattern in commits.averageLength
+
+---
+id: sdrflow-instinct-e2e-healing-workflow
+trigger: "When configuring CI/CD for E2E healing"
+confidence: 0.8
+domain: workflow
+source: repo-analysis
+source_repo: felipetruman/sdrflow
+---
+
+# Sdrflow Instinct E2e Healing Workflow
+
+## Action
+
+Use the workflow defined in '.github/workflows/e2e-healing.yml'
+
+## Evidence
+
+- Presence of .github/workflows/e2e-healing.yml
+- Commit: 'feat(ci): E2E autonomous healing workflow'
+
