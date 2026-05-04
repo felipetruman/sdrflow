@@ -37,6 +37,8 @@ export interface SupabaseClientLike {
     signInWithPassword(credentials: { email: string; password: string }): Promise<{ data: unknown; error: SupabaseError | null }>
     signUp(credentials: { email: string; password: string }): Promise<{ data: unknown; error: SupabaseError | null }>
     signOut(): Promise<{ error: SupabaseError | null }>
+    resetPasswordForEmail(email: string, options?: { redirectTo?: string }): Promise<{ data: unknown; error: SupabaseError | null }>
+    updateUser(attributes: { password?: string }): Promise<{ data: unknown; error: SupabaseError | null }>
   }
   from<T extends SupabaseTableName>(table: T): SupabaseQueryBuilder<SupabaseRow<T>>
   functions: {

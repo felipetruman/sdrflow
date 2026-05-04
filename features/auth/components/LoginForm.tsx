@@ -92,6 +92,16 @@ export function LoginForm() {
           {errors.password && <p className="text-xs" style={{ color: 'var(--error)' }}>{errors.password.message}</p>}
         </div>
 
+        <div className="flex justify-end">
+          <Link
+            href="/forgot-password"
+            className="text-xs transition-colors hover:underline underline-offset-4"
+            style={{ color: 'var(--amber)' }}
+          >
+            Esqueceu a senha?
+          </Link>
+        </div>
+
         {serverError && (
           <div className="rounded-lg px-3 py-2 text-sm" style={{ backgroundColor: 'var(--error-dim)', color: 'var(--error)', border: '1px solid rgba(239,68,68,0.2)' }}>
             {serverError}
