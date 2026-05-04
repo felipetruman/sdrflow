@@ -13,13 +13,28 @@ export async function createFunnelStage(input: Input): Promise<{ error?: string 
     const workspace = await getCurrentWorkspace()
     if (!workspace) return { error: 'Workspace não encontrado' }
 
+    const { data: sessionData } = await supabase.auth.getSession()
+    const user = sessionData.session?.user
+    if (!user) return { error: 'Não autenticado' }
+
+    const { data: myMembership } = await supabase
+      .from('workspace_members')
+      .select('role')
+      .eq('workspace_id', workspace.id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (myMembership?.role !== 'admin') {
+      return { error: 'Apenas administradores podem criar etapas' }
+    }
+
     const { data: existingRaw } = await supabase
       .from('funnel_stages')
       .select('order_index')
       .eq('workspace_id', workspace.id)
       .order('order_index', { ascending: false })
 
-    const existing = (existingRaw ?? []) as { order_index: number }[]
+    const existing = existingRaw ?? []
     const maxOrder = existing.reduce((max, s) => Math.max(max, s.order_index), -1)
     const order_index = maxOrder + 1
 

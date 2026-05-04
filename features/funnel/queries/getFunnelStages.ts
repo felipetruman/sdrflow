@@ -14,7 +14,7 @@ export async function getFunnelStages(): Promise<FunnelStage[]> {
     if (!workspace) return []
     const { data, error } = await supabase.from('funnel_stages').select('*').eq('workspace_id', workspace.id).order('order_index', { ascending: true })
     if (error) throw error
-    return (data ?? []) as FunnelStage[]
+    return data ?? []
   } catch (error) {
     console.error(getErrorMessage(error))
     return []

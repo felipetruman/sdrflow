@@ -40,6 +40,9 @@ export async function getCurrentWorkspace(): Promise<Workspace | null> {
     .select('workspaces(*)')
     .eq('user_id', user.id)
     .maybeSingle() as { data: unknown; error: unknown }
-  if (error) return null
+  if (error) {
+    console.error('[getCurrentWorkspace] DB error on fallback query:', error)
+    return null
+  }
   return extractWorkspace(data)
 }

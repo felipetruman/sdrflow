@@ -13,6 +13,21 @@ export async function updateFunnelStage(id: string, input: Input): Promise<{ err
     const workspace = await getCurrentWorkspace()
     if (!workspace) return { error: 'Workspace não encontrado' }
 
+    const { data: sessionData } = await supabase.auth.getSession()
+    const user = sessionData.session?.user
+    if (!user) return { error: 'Não autenticado' }
+
+    const { data: myMembership } = await supabase
+      .from('workspace_members')
+      .select('role')
+      .eq('workspace_id', workspace.id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (myMembership?.role !== 'admin') {
+      return { error: 'Apenas administradores podem editar etapas' }
+    }
+
     const { error } = await supabase
       .from('funnel_stages')
       .update({ name: input.name, color: input.color ?? null })

@@ -22,7 +22,7 @@ export async function inviteWorkspaceMember(input: Input): Promise<{ error?: str
       .select('role')
       .eq('workspace_id', workspace.id)
       .eq('user_id', user.id)
-      .maybeSingle() as { data: { role: string } | null; error: unknown }
+      .maybeSingle()
 
     if (myMembership?.role !== 'admin') {
       return { error: 'Apenas administradores podem convidar membros' }
@@ -31,11 +31,22 @@ export async function inviteWorkspaceMember(input: Input): Promise<{ error?: str
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     if (!serviceRoleKey) return { error: 'Configuração de servidor indisponível' }
 
-    const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
-    const adminClient = createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    if (!supabaseUrl) return { error: 'URL do Supabase não configurada' }
 
-    const { data: usersData } = await adminClient.auth.admin.listUsers()
-    const existingUser = usersData?.users?.find((u) => u.email === input.email.toLowerCase())
+    const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
+    const adminClient = createSupabaseClient(supabaseUrl, serviceRoleKey)
+
+    let existingUser: { id: string; email?: string | null } | undefined
+    let page = 1
+    while (!existingUser) {
+      const { data: pageData } = await adminClient.auth.admin.listUsers({ page, perPage: 100 })
+      const users = pageData?.users ?? []
+      if (users.length === 0) break
+      existingUser = users.find((u) => u.email === input.email.toLowerCase())
+      if (users.length < 100) break
+      page++
+    }
 
     let invitedUserId: string
 
@@ -53,7 +64,7 @@ export async function inviteWorkspaceMember(input: Input): Promise<{ error?: str
       .select('id')
       .eq('workspace_id', workspace.id)
       .eq('user_id', invitedUserId)
-      .maybeSingle() as { data: { id: string } | null; error: unknown }
+      .maybeSingle()
 
     if (alreadyMember) return { error: 'Este usuário já é membro do workspace' }
 

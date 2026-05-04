@@ -53,8 +53,8 @@ export function WorkspaceMembersPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-slate-200 bg-white p-4">
-        <h3 className="mb-4 font-semibold text-slate-800">Convidar novo membro</h3>
+      <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-base)' }}>
+        <h3 className="mb-4 font-semibold" style={{ color: 'var(--text-primary)' }}>Convidar novo membro</h3>
         <form onSubmit={handleInvite} className="flex flex-col gap-3 sm:flex-row">
           <input
             type="email"
@@ -62,12 +62,12 @@ export function WorkspaceMembersPanel() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="E-mail do novo membro"
             required
-            className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="sdr-input flex-1 px-3 py-2 text-sm"
           />
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as 'admin' | 'member')}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="sdr-input px-3 py-2 text-sm"
           >
             <option value="member">Membro</option>
             <option value="admin">Administrador</option>
@@ -75,38 +75,40 @@ export function WorkspaceMembersPanel() {
           <button
             type="submit"
             disabled={isPending || !email.trim()}
-            className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-40"
+            style={{ backgroundColor: 'var(--amber)', color: 'var(--text-inverse)' }}
           >
             <UserPlus className="h-4 w-4" />
             Convidar
           </button>
         </form>
-        {errorMsg && <p className="mt-2 text-sm text-red-600">{errorMsg}</p>}
-        {successMsg && <p className="mt-2 text-sm text-green-600">{successMsg}</p>}
+        {errorMsg && <p className="mt-2 text-sm" style={{ color: 'var(--error)' }}>{errorMsg}</p>}
+        {successMsg && <p className="mt-2 text-sm" style={{ color: 'var(--success)' }}>{successMsg}</p>}
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-4">
-        <h3 className="mb-4 font-semibold text-slate-800">
+      <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-base)' }}>
+        <h3 className="mb-4 font-semibold" style={{ color: 'var(--text-primary)' }}>
           Membros do workspace
-          <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-normal text-slate-500">
+          <span className="ml-2 rounded-full px-2 py-0.5 text-xs font-normal" style={{ backgroundColor: 'var(--bg-base)', color: 'var(--text-muted)' }}>
             {members.length}
           </span>
         </h3>
         <div className="space-y-2">
           {members.length === 0 && (
-            <p className="text-sm text-slate-500">Nenhum membro encontrado.</p>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Nenhum membro encontrado.</p>
           )}
           {members.map((member) => (
-            <div key={member.id} className="flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-200">
-                <User className="h-4 w-4 text-slate-600" />
+            <div key={member.id} className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: 'var(--bg-base)' }}>
+                <User className="h-4 w-4" style={{ color: 'var(--text-muted)' }} />
               </div>
-              <span className="flex-1 text-sm text-slate-700">{member.label}</span>
+              <span className="flex-1 text-sm" style={{ color: 'var(--text-secondary)' }}>{member.label}</span>
               <button
                 type="button"
                 onClick={() => handleRemove(member.id, member.label)}
                 disabled={isPending}
-                className="text-slate-400 transition-colors hover:text-red-600 disabled:opacity-40"
+                className="transition-colors hover:opacity-80 disabled:opacity-40"
+                style={{ color: 'var(--text-muted)' }}
                 title="Remover membro"
               >
                 <Trash2 className="h-4 w-4" />
@@ -116,10 +118,10 @@ export function WorkspaceMembersPanel() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+      <div className="rounded-lg px-4 py-3" style={{ border: '1px solid var(--amber)', backgroundColor: 'rgba(245,158,11,0.08)' }}>
         <div className="flex items-start gap-2">
-          <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
-          <p className="text-xs text-amber-700">
+          <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0" style={{ color: 'var(--amber)' }} />
+          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
             Membros convidados receberão um e-mail para acessar o workspace. Administradores podem gerenciar membros, etapas e configurações.
           </p>
         </div>
