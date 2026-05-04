@@ -22,12 +22,12 @@ export function KanbanColumn({ stage, leads, onEditLead, onDeleteLead }: Props) 
       }}
     >
       <div className="mb-3 flex items-center justify-between px-1">
-        <h3
+        <h2
           className="font-display text-sm font-semibold"
           style={{ color: 'var(--text-primary)' }}
         >
           {stage.name}
-        </h3>
+        </h2>
         <span
           className="font-mono rounded-md px-2 py-0.5 text-xs font-medium tabular-nums"
           style={{
