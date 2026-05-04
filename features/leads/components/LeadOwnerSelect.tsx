@@ -3,14 +3,17 @@
 import { useEffect, useState } from 'react'
 import { getWorkspaceMembers } from '@/features/workspaces/queries/getWorkspaceMembers'
 
-type Props = {
+interface LeadOwnerSelectProps {
   value?: string
   onChange: (value: string) => void
 }
 
-type MemberOption = { id: string; label: string }
+interface MemberOption {
+  id: string
+  label: string
+}
 
-export function LeadOwnerSelect({ value = '', onChange }: Props) {
+export function LeadOwnerSelect({ value = '', onChange }: LeadOwnerSelectProps) {
   const [members, setMembers] = useState<MemberOption[]>([])
 
   useEffect(() => {
@@ -23,7 +26,8 @@ export function LeadOwnerSelect({ value = '', onChange }: Props) {
     <select
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      className="rounded-lg border border-slate-300 px-3 py-2"
+      className="field"
+      aria-label="Responsável"
     >
       <option value="">Sem responsável</option>
       {members.map((member) => (

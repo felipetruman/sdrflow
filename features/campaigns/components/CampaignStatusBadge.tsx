@@ -1,10 +1,18 @@
-'use client'
-
 import type { CampaignStatus } from '@/types/app'
 
-export function CampaignStatusBadge({ status }: { status: CampaignStatus }) {
-  const styles = status === 'active' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'
-  const label = status === 'active' ? 'Ativa' : 'Inativa'
+interface CampaignStatusBadgeProps {
+  status: CampaignStatus
+}
 
-  return <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${styles}`}>{label}</span>
+export function CampaignStatusBadge({ status }: CampaignStatusBadgeProps) {
+  const isActive = status === 'active'
+  return (
+    <span className={`chip ${isActive ? 'chip-positive' : ''}`}>
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${isActive ? 'bg-positive' : 'bg-paper-fade'}`}
+        aria-hidden
+      />
+      {isActive ? 'Ativa' : 'Inativa'}
+    </span>
+  )
 }
