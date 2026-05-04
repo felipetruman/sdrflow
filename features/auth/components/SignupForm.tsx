@@ -5,22 +5,21 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react'
-import Link from 'next/link'
 import { signUp } from '@/features/auth/actions/signUp'
 import { useToast } from '@/lib/hooks/useToast'
+import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react'
+import Link from 'next/link'
 
 const schema = z
   .object({
-    email: z.string().email('Informe um e-mail válido'),
-    password: z.string().min(8, 'A senha precisa ter ao menos 8 caracteres'),
+    email:           z.string().email('Informe um e-mail válido'),
+    password:        z.string().min(8, 'A senha precisa ter ao menos 8 caracteres'),
     confirmPassword: z.string().min(1, 'Confirme sua senha'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'As senhas não conferem',
     path: ['confirmPassword'],
   })
-
 type FormValues = z.infer<typeof schema>
 
 export function SignupForm() {
@@ -43,156 +42,92 @@ export function SignupForm() {
       toast.error(result.error)
       return
     }
-    setMessage('Conta criada. Redirecionando…')
+    setMessage('Conta criada. Redirecionando...')
     toast.success('Conta criada!')
     setTimeout(() => router.push('/login'), 800)
   }
 
   return (
     <div className="w-full max-w-sm">
-      <div className="mb-10">
-        <Link
-          href="/"
-          className="font-display text-paper hover:text-signal mb-8 inline-flex items-baseline text-base font-bold tracking-tight transition-colors"
-          aria-label="Voltar para a home"
+      <div className="mb-8 text-center">
+        <div
+          className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl"
+          style={{ backgroundColor: 'var(--amber)', boxShadow: '0 0 30px var(--amber-glow)' }}
         >
-          sdr<span className="text-signal">·</span>flow
-        </Link>
-        <h1 className="font-display text-paper text-3xl font-semibold tracking-tight">
-          Criar conta
-        </h1>
-        <p className="text-paper-muted mt-2 text-sm">
-          Comece a usar o SDRFlow AI gratuitamente.
+          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="var(--text-inverse)" strokeWidth="2.5">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+        </div>
+        <h1 className="font-display text-2xl font-bold text-white">Criar conta</h1>
+        <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+          Comece a usar o SDRFlow AI gratuitamente
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-        <AuthField
-          id="email"
-          label="E-mail"
-          type="email"
-          placeholder="voce@empresa.com"
-          icon={Mail}
-          autoComplete="email"
-          register={register('email')}
-          error={errors.email?.message}
-        />
-        <AuthField
-          id="password"
-          label="Senha"
-          type="password"
-          placeholder="Mínimo 8 caracteres"
-          icon={Lock}
-          autoComplete="new-password"
-          register={register('password')}
-          error={errors.password?.message}
-        />
-        <AuthField
-          id="confirmPassword"
-          label="Confirmar senha"
-          type="password"
-          placeholder="Repita a senha"
-          icon={Lock}
-          autoComplete="new-password"
-          register={register('confirmPassword')}
-          error={errors.confirmPassword?.message}
-        />
+      <form onSubmit={handleSubmit(onSubmit)} method="POST" action="#" noValidate className="space-y-4">
+        <div className="space-y-1.5">
+          <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+            E-mail
+          </label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+            <input id="email" type="email" placeholder="voce@empresa.com" className="sdr-input py-2.5 pl-10 pr-3" {...register('email')} />
+          </div>
+          {errors.email && <p className="text-xs" style={{ color: 'var(--error)' }}>{errors.email.message}</p>}
+        </div>
 
-        {serverError ? (
-          <div
-            role="alert"
-            className="text-negative border-negative/30 rounded-sm border px-3 py-2 text-sm"
-            style={{ backgroundColor: 'var(--negative-bg)' }}
-          >
+        <div className="space-y-1.5">
+          <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+            Senha
+          </label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+            <input id="password" type="password" placeholder="Mínimo 8 caracteres" className="sdr-input py-2.5 pl-10 pr-3" {...register('password')} />
+          </div>
+          {errors.password && <p className="text-xs" style={{ color: 'var(--error)' }}>{errors.password.message}</p>}
+        </div>
+
+        <div className="space-y-1.5">
+          <label htmlFor="confirmPassword" className="block text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+            Confirmar senha
+          </label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+            <input id="confirmPassword" type="password" placeholder="Repita a senha" className="sdr-input py-2.5 pl-10 pr-3" {...register('confirmPassword')} />
+          </div>
+          {errors.confirmPassword && <p className="text-xs" style={{ color: 'var(--error)' }}>{errors.confirmPassword.message}</p>}
+        </div>
+
+        {serverError && (
+          <div className="rounded-lg px-3 py-2 text-sm" style={{ backgroundColor: 'var(--error-dim)', color: 'var(--error)', border: '1px solid rgba(239,68,68,0.2)' }}>
             {serverError}
           </div>
-        ) : null}
-        {message ? (
-          <div
-            role="status"
-            className="text-positive border-positive/30 rounded-sm border px-3 py-2 text-sm"
-            style={{ backgroundColor: 'var(--positive-bg)' }}
-          >
+        )}
+        {message && (
+          <div className="rounded-lg px-3 py-2 text-sm" style={{ backgroundColor: 'var(--success-dim)', color: 'var(--success)', border: '1px solid rgba(16,185,129,0.2)' }}>
             {message}
           </div>
-        ) : null}
+        )}
 
-        <button type="submit" disabled={isSubmitting} className="btn-signal w-full py-3">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="btn-amber flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold"
+        >
           {isSubmitting ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Criando conta…
-            </>
+            <><Loader2 className="h-4 w-4 animate-spin" /> Criando conta...</>
           ) : (
-            <>
-              Criar conta
-              <ArrowRight className="h-3.5 w-3.5" />
-            </>
+            <>Criar conta <ArrowRight className="h-4 w-4" /></>
           )}
         </button>
       </form>
 
-      <p className="text-paper-muted mt-8 text-center text-sm">
+      <p className="mt-6 text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
         Já tem uma conta?{' '}
-        <Link
-          href="/login"
-          className="text-signal hover:text-signal-soft font-semibold transition-colors"
-        >
+        <Link href="/login" className="font-semibold underline underline-offset-4" style={{ color: 'var(--amber)' }}>
           Entrar
         </Link>
       </p>
-    </div>
-  )
-}
-
-import type { LucideIcon } from 'lucide-react'
-import type { UseFormRegisterReturn } from 'react-hook-form'
-
-interface AuthFieldProps {
-  id: string
-  label: string
-  type: string
-  placeholder: string
-  icon: LucideIcon
-  autoComplete?: string
-  register: UseFormRegisterReturn
-  error?: string
-}
-
-function AuthField({
-  id,
-  label,
-  type,
-  placeholder,
-  icon: Icon,
-  autoComplete,
-  register,
-  error,
-}: AuthFieldProps) {
-  return (
-    <div className="space-y-1.5">
-      <label
-        htmlFor={id}
-        className="text-paper-muted block font-mono text-2xs uppercase tracking-[0.14em]"
-      >
-        {label}
-      </label>
-      <div className="relative">
-        <Icon
-          className="text-paper-quiet pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2"
-          aria-hidden
-        />
-        <input
-          id={id}
-          type={type}
-          placeholder={placeholder}
-          autoComplete={autoComplete}
-          aria-invalid={error ? true : undefined}
-          className="field py-2.5 pl-9 pr-3"
-          {...register}
-        />
-      </div>
-      {error ? <p className="text-negative text-xs">{error}</p> : null}
     </div>
   )
 }

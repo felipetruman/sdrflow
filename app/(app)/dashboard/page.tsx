@@ -13,25 +13,37 @@ export default async function DashboardPage() {
   })
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 md:px-6 md:py-10">
-      {/* Editorial page header */}
-      <header className="flex flex-col gap-3 pb-6 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-2">
-          <p className="eyebrow">Visão geral</p>
-          <h1 className="font-display text-paper text-3xl font-semibold tracking-tight md:text-4xl">
+    <div className="space-y-6 p-6">
+      {/* Page header */}
+      <div
+        className="flex items-end justify-between pb-5"
+        style={{ borderBottom: '1px solid var(--border-dim)' }}
+      >
+        <div>
+          <p
+            className="text-[10px] font-bold uppercase tracking-[0.16em]"
+            style={{ color: 'var(--amber)' }}
+          >
+            Visão Geral
+          </p>
+          <h1
+            className="mt-1 font-display text-3xl font-bold"
+            style={{ color: 'var(--text-primary)' }}
+          >
             Dashboard
           </h1>
-          <p className="text-paper-muted max-w-prose text-sm">
-            Métricas operacionais do funil em tempo real.
-          </p>
         </div>
-        <span className="chip self-start sm:self-auto">
-          <span className="bg-signal h-1.5 w-1.5 animate-pulse rounded-full" aria-hidden />
+        <div
+          className="rounded-full px-3 py-1.5 font-mono text-[11px]"
+          style={{
+            backgroundColor: 'var(--bg-elevated)',
+            color: 'var(--text-muted)',
+            border: '1px solid var(--border-dim)',
+          }}
+        >
           {dateLabel}
-        </span>
-      </header>
-
-      <div className="hairline" aria-hidden />
+        </div>
+      </div>
 
       <MetricsCards metrics={metrics} />
       <LeadsByStageChart metrics={metrics} />

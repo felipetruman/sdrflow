@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
                 id="forgot-email"
                 type="email"
                 placeholder="voce@empresa.com"
-                className="field py-2.5 pl-10 pr-3"
+                className="sdr-input py-2.5 pl-10 pr-3"
                 {...register('email')}
               />
             </div>

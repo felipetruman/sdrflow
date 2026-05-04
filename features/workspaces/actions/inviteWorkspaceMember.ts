@@ -28,6 +28,16 @@ export async function inviteWorkspaceMember(input: Input): Promise<{ error?: str
       return { error: 'Apenas administradores podem convidar membros' }
     }
 
+    const workspaceId = workspace.id
+
+    const { data: existingInvites } = await supabase
+      .from('workspace_members')
+      .select('id')
+      .eq('workspace_id', workspaceId)
+      .eq('role', 'member')
+    const currentMemberCount = (existingInvites?.length ?? 0) + 1
+    if (currentMemberCount > 50) return { error: 'Limite de membros atingido (50)' }
+
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     if (!serviceRoleKey) return { error: 'Configuração de servidor indisponível' }
 
@@ -65,7 +75,7 @@ export async function inviteWorkspaceMember(input: Input): Promise<{ error?: str
     const { data: alreadyMember } = await supabase
       .from('workspace_members')
       .select('id')
-      .eq('workspace_id', workspace.id)
+      .eq('workspace_id', workspaceId)
       .eq('user_id', invitedUserId)
       .maybeSingle()
 
@@ -73,7 +83,7 @@ export async function inviteWorkspaceMember(input: Input): Promise<{ error?: str
 
     const { error: insertError } = await supabase
       .from('workspace_members')
-      .insert({ workspace_id: workspace.id, user_id: invitedUserId, role: input.role })
+      .insert({ workspace_id: workspaceId, user_id: invitedUserId, role: input.role })
 
     if (insertError) throw insertError
 

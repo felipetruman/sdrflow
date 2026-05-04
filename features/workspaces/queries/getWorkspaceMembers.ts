@@ -11,6 +11,61 @@ type WorkspaceMember = {
   label: string
 }
 
+const userLabelCache = new Map<string, string>()
+
+async function resolveUserLabels(userIds: string[]): Promise<Record<string, string>> {
+  const result: Record<string, string> = {}
+  const uncached: string[] = []
+
+  for (const uid of userIds) {
+    const cached = userLabelCache.get(uid)
+    if (cached) {
+      result[uid] = cached
+    } else {
+      uncached.push(uid)
+    }
+  }
+
+  if (uncached.length === 0) return result
+
+  try {
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (serviceRoleKey) {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      if (supabaseUrl) {
+        const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
+        const adminClient = createSupabaseClient(supabaseUrl, serviceRoleKey)
+        await Promise.all(
+          uncached.map(async (userId) => {
+            try {
+              const { data: userResult } = await adminClient.auth.admin.getUserById(userId)
+              if (userResult?.user) {
+                const meta = userResult.user.user_metadata as { name?: string } | undefined
+                const label = userResult.user.email || meta?.name || `Usuário ${userId.slice(0, 8)}`
+                result[userId] = label
+                userLabelCache.set(userId, label)
+              }
+            } catch {
+              // keep fallback
+            }
+          }),
+        )
+      }
+    }
+  } catch {
+    // fallback
+  }
+
+  for (const uid of uncached) {
+    if (!result[uid]) {
+      result[uid] = `Usuário ${uid.slice(0, 8)}`
+      userLabelCache.set(uid, result[uid])
+    }
+  }
+
+  return result
+}
+
 export async function getWorkspaceMembers(): Promise<WorkspaceMember[]> {
   if (isDemoMode()) {
     return [
@@ -33,34 +88,8 @@ export async function getWorkspaceMembers(): Promise<WorkspaceMember[]> {
     return []
   }
 
-  // Fetch labels only for the specific members of this workspace (never all tenants)
-  const userMap: Record<string, string> = {}
-  try {
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    if (serviceRoleKey) {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-      if (!supabaseUrl) return []
-
-      const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
-      const adminClient = createSupabaseClient(supabaseUrl, serviceRoleKey)
-      const memberIds = data.map((m) => m.user_id)
-      await Promise.all(
-        memberIds.map(async (userId) => {
-          try {
-            const { data: userResult } = await adminClient.auth.admin.getUserById(userId)
-            if (userResult?.user) {
-              const meta = userResult.user.user_metadata as { name?: string } | undefined
-              userMap[userId] = userResult.user.email || meta?.name || userId
-            }
-          } catch {
-            // keep fallback label for this user
-          }
-        }),
-      )
-    }
-  } catch {
-    // fallback to user_id
-  }
+  const memberIds = data.map((m) => m.user_id)
+  const userMap = await resolveUserLabels(memberIds)
 
   return data.map((m) => ({
     ...m,

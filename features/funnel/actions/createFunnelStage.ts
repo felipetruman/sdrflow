@@ -9,6 +9,8 @@ type Input = { name: string; color?: string }
 
 export async function createFunnelStage(input: Input): Promise<{ error?: string }> {
   try {
+    const name = input.name.trim()
+    if (!name || name.length > 100) return { error: 'Nome da etapa inválido (1-100 caracteres)' }
     const supabase = await createClient()
     const workspace = await getCurrentWorkspace()
     if (!workspace) return { error: 'Workspace não encontrado' }
@@ -40,7 +42,7 @@ export async function createFunnelStage(input: Input): Promise<{ error?: string 
 
     const { error } = await supabase.from('funnel_stages').insert({
       workspace_id: workspace.id,
-      name: input.name,
+      name,
       color: input.color ?? '#64748b',
       order_index,
     })

@@ -1,16 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, ChevronsUpDown, Loader2 } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { ChevronDown, Check, Loader2 } from 'lucide-react'
 import { switchWorkspace } from '@/features/workspaces/actions/switchWorkspace'
 import { getUserWorkspaces } from '@/features/workspaces/queries/getUserWorkspaces'
 import { useToast } from '@/lib/hooks/useToast'
@@ -21,94 +13,93 @@ interface WorkspaceSwitcherProps {
 }
 
 export function WorkspaceSwitcher({ current }: WorkspaceSwitcherProps) {
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([current])
-  const [loaded, setLoaded] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([])
+  const [loading, setLoading] = useState(false)
   const [switching, setSwitching] = useState(false)
+  const [loaded, setLoaded] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
 
   useEffect(() => {
-    getUserWorkspaces()
-      .then((list) => {
-        setWorkspaces(list)
-        setLoaded(true)
-      })
-      .catch(() => {
-        setLoaded(true)
-      })
+    getUserWorkspaces().then((list) => {
+      setWorkspaces(list)
+      setLoaded(true)
+    })
   }, [])
 
-  async function handleSwitch(workspace: Workspace) {
-    if (workspace.id === current.id) return
+  async function toggleDropdown() {
+    if (!open && !loaded) {
+      setLoading(true)
+      const list = await getUserWorkspaces()
+      setWorkspaces(list)
+      setLoaded(true)
+      setLoading(false)
+    }
+    setOpen(!open)
+  }
+
+  async function handleSwitch(ws: Workspace) {
+    if (ws.id === current.id) { setOpen(false); return }
     setSwitching(true)
     try {
-      const result = await switchWorkspace(workspace.id)
+      const result = await switchWorkspace(ws.id)
       if (result.error) {
         toast.error(result.error)
-        return
+      } else {
+        router.refresh()
       }
-      router.refresh()
     } catch {
       toast.error('Erro ao trocar de workspace')
     } finally {
+      setOpen(false)
       setSwitching(false)
     }
   }
 
-  // Hide if only a single workspace
-  if (loaded && workspaces.length <= 1) {
-    return (
-      <div className="text-paper-muted truncate text-sm font-medium">
-        {current.name}
-      </div>
-    )
-  }
-
-  const initials = current.name.slice(0, 2).toUpperCase()
+  if (loaded && workspaces.length <= 1 && !loading) return null
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          className="bg-ink-800 hover:bg-ink-700 border-ink-700 text-paper flex w-full items-center gap-2.5 rounded-sm border px-2.5 py-2 text-left text-sm transition-colors"
-          aria-label="Trocar workspace"
-        >
-          <span className="bg-signal-bg text-signal border-signal-deep flex h-7 w-7 shrink-0 items-center justify-center rounded-xs border font-mono text-2xs font-semibold">
-            {initials}
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-medium">{current.name}</span>
-            <span className="text-paper-quiet block font-mono text-2xs uppercase tracking-[0.14em]">
-              Workspace
-            </span>
-          </span>
-          {switching ? (
-            <Loader2 className="text-paper-quiet h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <ChevronsUpDown className="text-paper-quiet h-3.5 w-3.5" />
-          )}
-        </button>
-      </DropdownMenuTrigger>
+    <div className="relative">
+      <button
+        onClick={toggleDropdown}
+        className="flex w-full items-center gap-1 text-xs transition-colors"
+        style={{ color: 'var(--text-muted)' }}
+      >
+        <ChevronDown className={`h-3 w-3 transition-transform ${open ? 'rotate-180' : ''}`} />
+        {!loaded ? 'Carregando...' : 'Trocar workspace'}
+      </button>
 
-      <DropdownMenuContent align="start" className="w-56">
-        <DropdownMenuLabel className="eyebrow-quiet">
-          Workspaces
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {workspaces.map((workspace) => (
-          <DropdownMenuItem
-            key={workspace.id}
-            disabled={switching}
-            onSelect={() => handleSwitch(workspace)}
-            className="flex items-center justify-between gap-2"
+      {open && (
+        <>
+          <button className="fixed inset-0 z-50" onClick={() => setOpen(false)} />
+          <div
+            className="absolute left-0 top-full z-50 mt-1 w-56 rounded-lg py-1 shadow-lg"
+            style={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border-base)' }}
           >
-            <span className="truncate">{workspace.name}</span>
-            {workspace.id === current.id ? (
-              <Check className="text-signal h-3.5 w-3.5" />
-            ) : null}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+            {loading && (
+              <div className="px-3 py-2 text-xs" style={{ color: 'var(--text-muted)' }}>Carregando...</div>
+            )}
+            {switching && (
+              <div className="flex items-center gap-2 px-3 py-2 text-xs" style={{ color: 'var(--text-muted)' }}>
+                <Loader2 className="h-3 w-3 animate-spin" /> Trocando...
+              </div>
+            )}
+            {workspaces.map((ws) => (
+              <button
+                key={ws.id}
+                onClick={() => handleSwitch(ws)}
+                disabled={switching}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors disabled:opacity-40"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                <span className="flex-1 text-left truncate">{ws.name}</span>
+                {ws.id === current.id && <Check className="h-3.5 w-3.5" style={{ color: 'var(--success)' }} />}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
   )
 }

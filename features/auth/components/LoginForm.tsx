@@ -5,16 +5,15 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react'
-import Link from 'next/link'
 import { signIn } from '@/features/auth/actions/signIn'
 import { useToast } from '@/lib/hooks/useToast'
+import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react'
+import Link from 'next/link'
 
 const schema = z.object({
-  email: z.string().email('Informe um e-mail válido'),
+  email:    z.string().email('Informe um e-mail válido'),
   password: z.string().min(1, 'Informe sua senha'),
 })
-
 type FormValues = z.infer<typeof schema>
 
 export function LoginForm() {
@@ -40,115 +39,91 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-sm">
-      <div className="mb-10">
-        <Link
-          href="/"
-          className="font-display text-paper hover:text-signal mb-8 inline-flex items-baseline text-base font-bold tracking-tight transition-colors"
-          aria-label="Voltar para a home"
+      {/* Header */}
+      <div className="mb-8 text-center">
+        <div
+          className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl"
+          style={{ backgroundColor: 'var(--amber)', boxShadow: '0 0 30px var(--amber-glow)' }}
         >
-          sdr<span className="text-signal">·</span>flow
-        </Link>
-        <h1 className="font-display text-paper text-3xl font-semibold tracking-tight">
-          Acessar workspace
-        </h1>
-        <p className="text-paper-muted mt-2 text-sm">Entre na sua conta para continuar.</p>
+          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="var(--text-inverse)" strokeWidth="2.5">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+        </div>
+        <h1 className="font-display text-2xl font-bold text-white">Bem-vindo de volta</h1>
+        <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+          Entre na sua conta para continuar
+        </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} method="POST" action="#" noValidate className="space-y-4">
+        {/* Email */}
         <div className="space-y-1.5">
-          <label
-            htmlFor="email"
-            className="text-paper-muted block font-mono text-2xs uppercase tracking-[0.14em]"
-          >
+          <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
             E-mail
           </label>
           <div className="relative">
-            <Mail
-              className="text-paper-quiet pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2"
-              aria-hidden
-            />
+            <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
             <input
               id="email"
               type="email"
               placeholder="voce@empresa.com"
-              autoComplete="email"
-              className="field py-2.5 pl-9 pr-3"
-              aria-invalid={errors.email ? true : undefined}
+              className="sdr-input py-2.5 pl-10 pr-3"
               {...register('email')}
             />
           </div>
-          {errors.email ? (
-            <p className="text-negative text-xs">{errors.email.message}</p>
-          ) : null}
+          {errors.email && <p className="text-xs" style={{ color: 'var(--error)' }}>{errors.email.message}</p>}
         </div>
 
+        {/* Password */}
         <div className="space-y-1.5">
-          <label
-            htmlFor="password"
-            className="text-paper-muted block font-mono text-2xs uppercase tracking-[0.14em]"
-          >
+          <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
             Senha
           </label>
           <div className="relative">
-            <Lock
-              className="text-paper-quiet pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2"
-              aria-hidden
-            />
+            <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
             <input
               id="password"
               type="password"
               placeholder="••••••••"
-              autoComplete="current-password"
-              className="field py-2.5 pl-9 pr-3"
-              aria-invalid={errors.password ? true : undefined}
+              className="sdr-input py-2.5 pl-10 pr-3"
               {...register('password')}
             />
           </div>
-          {errors.password ? (
-            <p className="text-negative text-xs">{errors.password.message}</p>
-          ) : null}
+          {errors.password && <p className="text-xs" style={{ color: 'var(--error)' }}>{errors.password.message}</p>}
         </div>
 
         <div className="flex justify-end">
           <Link
             href="/forgot-password"
-            className="text-paper-quiet hover:text-signal text-xs transition-colors"
+            className="text-xs transition-colors hover:underline underline-offset-4"
+            style={{ color: 'var(--amber)' }}
           >
             Esqueceu a senha?
           </Link>
         </div>
 
-        {serverError ? (
-          <div
-            role="alert"
-            className="text-negative border-negative/30 rounded-sm border px-3 py-2 text-sm"
-            style={{ backgroundColor: 'var(--negative-bg)' }}
-          >
+        {serverError && (
+          <div className="rounded-lg px-3 py-2 text-sm" style={{ backgroundColor: 'var(--error-dim)', color: 'var(--error)', border: '1px solid rgba(239,68,68,0.2)' }}>
             {serverError}
           </div>
-        ) : null}
+        )}
 
-        <button type="submit" disabled={isSubmitting} className="btn-signal w-full py-3">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="btn-amber flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold"
+        >
           {isSubmitting ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Entrando…
-            </>
+            <><Loader2 className="h-4 w-4 animate-spin" /> Entrando...</>
           ) : (
-            <>
-              Entrar
-              <ArrowRight className="h-3.5 w-3.5" />
-            </>
+            <>Entrar <ArrowRight className="h-4 w-4" /></>
           )}
         </button>
       </form>
 
-      <p className="text-paper-muted mt-8 text-center text-sm">
+      <p className="mt-6 text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
         Ainda não tem conta?{' '}
-        <Link
-          href="/signup"
-          className="text-signal hover:text-signal-soft font-semibold transition-colors"
-        >
+        <Link href="/signup" className="font-semibold underline underline-offset-4" style={{ color: 'var(--amber)' }}>
           Criar conta
         </Link>
       </p>

@@ -8,29 +8,18 @@ import { updateFunnelStage } from '@/features/funnel/actions/updateFunnelStage'
 import { deleteFunnelStage } from '@/features/funnel/actions/deleteFunnelStage'
 import type { FunnelStage } from '@/types/app'
 
-const COLORS = ['#64748b', '#3b82f6', '#8b5cf6', '#E8B547', '#10b981', '#ef4444', '#ec4899']
+const COLORS = ['#64748b', '#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#ec4899']
 
-interface ColorPickerProps {
-  value: string
-  onChange: (color: string) => void
-}
-
-function ColorPicker({ value, onChange }: ColorPickerProps) {
+function ColorPicker({ value, onChange }: { value: string; onChange: (c: string) => void }) {
   return (
-    <div className="flex gap-1" role="radiogroup" aria-label="Cor da etapa">
-      {COLORS.map((color) => (
+    <div className="flex gap-1">
+      {COLORS.map((c) => (
         <button
-          key={color}
+          key={c}
           type="button"
-          onClick={() => onChange(color)}
-          aria-label={`Cor ${color}`}
-          aria-checked={value === color}
-          role="radio"
+          onClick={() => onChange(c)}
           className="h-5 w-5 rounded-full border-2 transition-transform hover:scale-110"
-          style={{
-            backgroundColor: color,
-            borderColor: value === color ? 'var(--signal)' : 'transparent',
-          }}
+          style={{ backgroundColor: c, borderColor: value === c ? 'var(--amber)' : 'transparent' }}
         />
       ))}
     </div>
@@ -53,35 +42,26 @@ export function FunnelStageManager() {
     setStages(data)
   }
 
-  useEffect(() => {
-    void load()
-  }, [])
+  useEffect(() => { void load() }, [])
 
-  function startEdit(stage: FunnelStage) {
+  const startEdit = (stage: FunnelStage) => {
     setEditingId(stage.id)
     setEditName(stage.name)
     setEditColor(stage.color ?? COLORS[0])
     setErrorMsg('')
   }
 
-  async function saveEdit() {
+  const saveEdit = async () => {
     if (!editingId || !editName.trim()) return
     setIsPending(true)
-    const result = await updateFunnelStage(editingId, {
-      name: editName.trim(),
-      color: editColor,
-    })
-    if (result.error) {
-      setErrorMsg(result.error)
-      setIsPending(false)
-      return
-    }
+    const result = await updateFunnelStage(editingId, { name: editName.trim(), color: editColor })
+    if (result.error) { setErrorMsg(result.error); setIsPending(false); return }
     setEditingId(null)
     await load()
     setIsPending(false)
   }
 
-  async function handleDelete(id: string, name: string) {
+  const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Excluir a etapa "${name}"? Ação irreversível.`)) return
     setErrorMsg('')
     setIsPending(true)
@@ -91,15 +71,11 @@ export function FunnelStageManager() {
     setIsPending(false)
   }
 
-  async function handleCreate() {
+  const handleCreate = async () => {
     if (!newName.trim()) return
     setIsPending(true)
     const result = await createFunnelStage({ name: newName.trim(), color: newColor })
-    if (result.error) {
-      setErrorMsg(result.error)
-      setIsPending(false)
-      return
-    }
+    if (result.error) { setErrorMsg(result.error); setIsPending(false); return }
     setNewName('')
     setShowAdd(false)
     await load()
@@ -107,100 +83,55 @@ export function FunnelStageManager() {
   }
 
   return (
-    <div className="editorial-card p-4">
+    <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-base)' }}>
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-display text-paper text-base font-semibold tracking-tight">
-          Etapas do funil
-        </h3>
+        <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Etapas do Funil</h3>
         <button
           type="button"
-          onClick={() => {
-            setShowAdd(true)
-            setErrorMsg('')
-          }}
-          className="btn-signal text-xs"
+          onClick={() => { setShowAdd(true); setErrorMsg('') }}
+          className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors"
+          style={{ backgroundColor: 'var(--amber)', color: 'var(--text-inverse)' }}
         >
-          <Plus className="h-3.5 w-3.5" />
-          Nova etapa
+          <Plus className="h-4 w-4" /> Nova etapa
         </button>
       </div>
 
-      {errorMsg ? (
-        <p
-          role="alert"
-          className="text-negative border-negative/30 mb-3 rounded-sm border px-3 py-2 text-sm"
-          style={{ backgroundColor: 'var(--negative-bg)' }}
-        >
+      {errorMsg && (
+        <p className="mb-3 rounded-lg px-3 py-2 text-sm" style={{ backgroundColor: 'rgba(239,68,68,0.1)', color: 'var(--error)' }}>
           {errorMsg}
         </p>
-      ) : null}
+      )}
 
       <div className="space-y-2">
         {stages.map((stage) => (
-          <div
-            key={stage.id}
-            className="bg-ink-900 border-ink-700 hover:border-ink-600 flex items-center gap-3 rounded-sm border px-3 py-2 transition-colors"
-          >
+          <div key={stage.id} className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ border: '1px solid var(--border-dim)' }}>
             {editingId === stage.id ? (
               <>
                 <ColorPicker value={editColor} onChange={setEditColor} />
                 <input
                   value={editName}
-                  onChange={(event) => setEditName(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') void saveEdit()
-                  }}
-                  className="field flex-1 py-1 text-sm"
+                  onChange={(e) => setEditName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') void saveEdit() }}
+                  className="sdr-input flex-1 px-2 py-1 text-sm"
                   autoFocus
-                  aria-label="Nome da etapa"
                 />
-                <button
-                  type="button"
-                  onClick={saveEdit}
-                  disabled={isPending}
-                  className="text-positive hover:text-positive transition-colors disabled:opacity-40"
-                  aria-label="Salvar"
-                >
+                <button type="button" onClick={saveEdit} disabled={isPending} className="transition-colors disabled:opacity-40" style={{ color: 'var(--success)' }}>
                   <Check className="h-4 w-4" />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setEditingId(null)}
-                  className="text-paper-quiet hover:text-paper transition-colors"
-                  aria-label="Cancelar"
-                >
+                <button type="button" onClick={() => setEditingId(null)} className="transition-colors" style={{ color: 'var(--text-muted)' }}>
                   <X className="h-4 w-4" />
                 </button>
               </>
             ) : (
               <>
-                <span
-                  className="h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: stage.color ?? '#64748b' }}
-                  aria-hidden
-                />
-                <span className="text-paper flex-1 text-sm font-medium">{stage.name}</span>
-                <span className="text-paper-quiet num-tabular text-2xs">
-                  #{stage.order_index + 1}
-                </span>
-                <button
-                  type="button"
-                  title="Editar etapa"
-                  aria-label="Editar etapa"
-                  onClick={() => startEdit(stage)}
-                  className="text-paper-quiet hover:text-paper transition-colors"
-                >
-                  <Pencil className="h-3.5 w-3.5" />
+                <span className="h-3 w-3 flex-shrink-0 rounded-full" style={{ backgroundColor: stage.color ?? '#64748b' }} />
+                <span className="flex-1 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{stage.name}</span>
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>#{stage.order_index + 1}</span>
+                <button type="button" title="Editar etapa" aria-label="Editar etapa" onClick={() => startEdit(stage)} className="transition-colors" style={{ color: 'var(--text-muted)' }}>
+                  <Pencil className="h-4 w-4" />
                 </button>
-                <button
-                  type="button"
-                  title="Remover etapa"
-                  aria-label="Remover etapa"
-                  onClick={() => handleDelete(stage.id, stage.name)}
-                  disabled={isPending}
-                  className="text-paper-quiet hover:text-negative transition-colors disabled:opacity-40"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
+                <button type="button" title="Remover etapa" aria-label="Remover etapa" onClick={() => handleDelete(stage.id, stage.name)} disabled={isPending} className="transition-colors disabled:opacity-40" style={{ color: 'var(--text-muted)' }}>
+                  <Trash2 className="h-4 w-4" />
                 </button>
               </>
             )}
@@ -208,42 +139,25 @@ export function FunnelStageManager() {
         ))}
       </div>
 
-      {showAdd ? (
-        <div className="bg-ink-800 border-ink-600 mt-3 flex items-center gap-3 rounded-sm border px-3 py-2">
+      {showAdd && (
+        <div className="mt-3 flex items-center gap-3 rounded-lg px-3 py-2" style={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
           <ColorPicker value={newColor} onChange={setNewColor} />
           <input
             value={newName}
-            onChange={(event) => setNewName(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') void handleCreate()
-            }}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') void handleCreate() }}
             placeholder="Nome da etapa"
-            className="field flex-1 py-1 text-sm"
+            className="sdr-input flex-1 px-2 py-1 text-sm"
             autoFocus
-            aria-label="Nome da nova etapa"
           />
-          <button
-            type="button"
-            onClick={handleCreate}
-            disabled={isPending || !newName.trim()}
-            className="text-positive hover:text-positive transition-colors disabled:opacity-40"
-            aria-label="Criar etapa"
-          >
+          <button type="button" onClick={handleCreate} disabled={isPending || !newName.trim()} className="transition-colors disabled:opacity-40" style={{ color: 'var(--success)' }}>
             <Check className="h-4 w-4" />
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              setShowAdd(false)
-              setNewName('')
-            }}
-            className="text-paper-quiet hover:text-paper transition-colors"
-            aria-label="Cancelar"
-          >
+          <button type="button" onClick={() => { setShowAdd(false); setNewName('') }} className="transition-colors" style={{ color: 'var(--text-muted)' }}>
             <X className="h-4 w-4" />
           </button>
         </div>
-      ) : null}
+      )}
     </div>
   )
 }

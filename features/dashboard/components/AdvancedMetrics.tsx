@@ -1,127 +1,83 @@
+'use client'
+
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import type { DashboardMetrics } from '@/types/app'
 
-interface AdvancedMetricsProps {
-  metrics: DashboardMetrics
-}
-
-function formatNumber(value: number): string {
-  return new Intl.NumberFormat('pt-BR').format(value)
-}
-
-export function AdvancedMetrics({ metrics }: AdvancedMetricsProps) {
-  const { stageConversionRates, messagesByCampaign } = metrics
+export function AdvancedMetrics({ metrics }: { metrics: DashboardMetrics }) {
+  const { leadsLast7Days, leadsLast30Days, messagesByCampaign, stageConversionRates } = metrics
 
   return (
-    <div className="grid gap-3 lg:grid-cols-2">
-      {stageConversionRates && stageConversionRates.length > 0 ? (
-        <ConversionRates rates={stageConversionRates} />
-      ) : null}
+    <div className="space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-base)' }}>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Leads nos últimos 7 dias</p>
+          <p className="mt-1 text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{leadsLast7Days ?? 0}</p>
+        </div>
+        <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-base)' }}>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Leads nos últimos 30 dias</p>
+          <p className="mt-1 text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{leadsLast30Days ?? 0}</p>
+        </div>
+      </div>
 
-      {messagesByCampaign && messagesByCampaign.length > 0 ? (
-        <MessagesByCampaign data={messagesByCampaign} />
-      ) : null}
+      {stageConversionRates && stageConversionRates.length > 0 && (
+        <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-base)' }}>
+          <h3 className="mb-3 font-semibold" style={{ color: 'var(--text-primary)' }}>Taxa de Conversão entre Etapas</h3>
+          <div className="space-y-2">
+            {stageConversionRates.map((item, idx) => {
+              const isHigh = item.rate >= 70
+              const isLow = item.rate < 30
+              const Icon = isHigh ? TrendingUp : isLow ? TrendingDown : Minus
+              const barColor = isHigh ? 'var(--success)' : isLow ? 'var(--error)' : 'var(--amber)'
+              const textColor = isHigh ? 'var(--success)' : isLow ? 'var(--error)' : 'var(--amber)'
+              return (
+                <div key={idx}>
+                  <div className="mb-1 flex items-center justify-between text-sm">
+                    <span className="truncate" style={{ color: 'var(--text-secondary)' }}>
+                      {item.from_stage} → {item.to_stage}
+                    </span>
+                    <span className="ml-2 flex items-center gap-1 font-medium" style={{ color: textColor }}>
+                      <Icon className="h-3.5 w-3.5" />
+                      {item.rate}%
+                    </span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full" style={{ backgroundColor: 'var(--bg-base)' }}>
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{ width: `${Math.min(item.rate, 100)}%`, backgroundColor: barColor }}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {messagesByCampaign && messagesByCampaign.length > 0 && (
+        <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-base)' }}>
+          <h3 className="mb-3 font-semibold" style={{ color: 'var(--text-primary)' }}>Mensagens por Campanha</h3>
+          <div className="space-y-2">
+            {messagesByCampaign.map((item) => {
+              const max = messagesByCampaign[0]?.count ?? 1
+              const pct = Math.round((item.count / max) * 100)
+              return (
+                <div key={item.campaign_id}>
+                  <div className="mb-1 flex items-center justify-between text-sm">
+                    <span className="truncate" style={{ color: 'var(--text-secondary)' }}>{item.campaign_name}</span>
+                    <span className="ml-2 font-medium" style={{ color: 'var(--text-primary)' }}>{item.count}</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full" style={{ backgroundColor: 'var(--bg-base)' }}>
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{ width: `${pct}%`, backgroundColor: 'var(--cyan)' }}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
-  )
-}
-
-interface ConversionRatesProps {
-  rates: NonNullable<DashboardMetrics['stageConversionRates']>
-}
-
-function ConversionRates({ rates }: ConversionRatesProps) {
-  return (
-    <section className="editorial-card p-5">
-      <header className="pb-4">
-        <p className="eyebrow-quiet">Performance</p>
-        <h3 className="font-display text-paper mt-1 text-lg font-semibold tracking-tight">
-          Conversão entre etapas
-        </h3>
-      </header>
-
-      <div className="space-y-3">
-        {rates.map((rate) => {
-          const tone =
-            rate.rate >= 70 ? 'positive' : rate.rate < 30 ? 'negative' : 'pending'
-          const Icon =
-            tone === 'positive' ? TrendingUp : tone === 'negative' ? TrendingDown : Minus
-          const colorClass =
-            tone === 'positive'
-              ? 'text-positive'
-              : tone === 'negative'
-                ? 'text-negative'
-                : 'text-pending'
-          const barClass =
-            tone === 'positive'
-              ? 'bg-positive'
-              : tone === 'negative'
-                ? 'bg-negative'
-                : 'bg-pending'
-
-          return (
-            <div key={`${rate.from_stage}-${rate.to_stage}`} className="space-y-1.5">
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="text-paper-muted truncate">
-                  {rate.from_stage}{' '}
-                  <span className="text-paper-fade font-mono">→</span>{' '}
-                  <span className="text-paper">{rate.to_stage}</span>
-                </span>
-                <span className={`num-tabular flex items-center gap-1 font-semibold ${colorClass}`}>
-                  <Icon className="h-3.5 w-3.5" />
-                  {rate.rate}%
-                </span>
-              </div>
-              <div className="bg-ink-700 h-1 overflow-hidden rounded-full">
-                <div
-                  className={`h-full rounded-full transition-all ${barClass}`}
-                  style={{ width: `${Math.min(rate.rate, 100)}%` }}
-                />
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </section>
-  )
-}
-
-interface MessagesByCampaignProps {
-  data: NonNullable<DashboardMetrics['messagesByCampaign']>
-}
-
-function MessagesByCampaign({ data }: MessagesByCampaignProps) {
-  const max = Math.max(1, ...data.map((item) => item.count))
-
-  return (
-    <section className="editorial-card p-5">
-      <header className="pb-4">
-        <p className="eyebrow-quiet">Outbound</p>
-        <h3 className="font-display text-paper mt-1 text-lg font-semibold tracking-tight">
-          Mensagens por campanha
-        </h3>
-      </header>
-
-      <div className="space-y-3">
-        {data.map((item) => {
-          const pct = (item.count / max) * 100
-          return (
-            <div key={item.campaign_id} className="space-y-1.5">
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="text-paper-muted truncate">{item.campaign_name}</span>
-                <span className="text-paper num-tabular font-semibold">
-                  {formatNumber(item.count)}
-                </span>
-              </div>
-              <div className="bg-ink-700 h-1 overflow-hidden rounded-full">
-                <div
-                  className="bg-signal h-full rounded-full"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </section>
   )
 }

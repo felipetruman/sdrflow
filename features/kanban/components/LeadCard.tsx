@@ -2,154 +2,109 @@
 
 import { CSS } from '@dnd-kit/utilities'
 import { useSortable } from '@dnd-kit/sortable'
-import { Building2, GripVertical, MoreHorizontal, Eye, Pencil, Trash2 } from 'lucide-react'
+import { Building2, Eye, GripVertical, Pencil, Trash2 } from 'lucide-react'
 import Link from 'next/link'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import type { LeadWithStage } from '@/types/app'
 
-interface LeadCardProps {
+type Props = {
   lead: LeadWithStage
   onEdit?: (lead: LeadWithStage) => void
   onDelete?: (lead: LeadWithStage) => void
 }
 
-function daysSince(iso: string | null | undefined): number {
-  if (!iso) return 0
-  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000)
-  return Math.max(0, days)
-}
-
-function initials(name: string): string {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('')
-}
-
-export function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: lead.id,
-  })
-
-  const days = daysSince(lead.updated_at ?? lead.created_at)
-  const ageTone = days >= 14 ? 'text-negative' : days >= 7 ? 'text-pending' : 'text-paper-quiet'
+export function LeadCard({ lead, onEdit, onDelete }: Props) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: lead.id })
 
   return (
-    <article
+    <div
       data-lead-card
       ref={setNodeRef}
       style={{
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.4 : 1,
+        backgroundColor: 'var(--bg-elevated)',
+        border: '1px solid var(--border-dim)',
+        opacity: isDragging ? 0.5 : 1,
       }}
-      className="group bg-ink-900 hover:bg-ink-800 hover:border-ink-500 border-ink-700 relative rounded-md border p-3 shadow-1 transition-colors"
+      className="group relative rounded-xl p-3 transition-all hover:border-[var(--border-bright)]"
     >
-      <div className="flex items-start gap-2">
-        <button
-          {...attributes}
-          {...listeners}
-          aria-label="Arrastar lead"
-          className="text-paper-fade group-hover:text-paper-quiet -ml-1 mt-0.5 shrink-0 cursor-grab active:cursor-grabbing"
-        >
-          <GripVertical className="h-3.5 w-3.5" />
-        </button>
-
+      {/* Drag handle + name row */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="mb-2 flex items-start gap-2 cursor-grab active:cursor-grabbing"
+      >
+        <GripVertical
+          className="mt-0.5 h-3.5 w-3.5 shrink-0 opacity-30 group-hover:opacity-60"
+          style={{ color: 'var(--text-muted)' }}
+        />
         <div className="min-w-0 flex-1">
-          <Link
-            href={`/leads/${lead.id}`}
-            className="block focus-visible:outline-none"
-          >
-            <h4 className="font-display text-paper truncate text-sm font-semibold tracking-tight">
-              {lead.name}
-            </h4>
-            {lead.company || lead.job_title ? (
-              <p className="text-paper-quiet mt-0.5 flex items-center gap-1 truncate text-xs">
-                {lead.company ? (
-                  <>
-                    <Building2 className="h-3 w-3 shrink-0" />
-                    <span className="truncate">{lead.company}</span>
-                  </>
-                ) : null}
-                {lead.company && lead.job_title ? (
-                  <span className="text-paper-fade">·</span>
-                ) : null}
-                {lead.job_title ? <span className="truncate">{lead.job_title}</span> : null}
-              </p>
-            ) : null}
-          </Link>
+          <h4 className="truncate text-sm font-semibold text-white">{lead.name}</h4>
+          {lead.company ? (
+            <p className="mt-0.5 flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+              <Building2 className="h-3 w-3 shrink-0" />
+              <span className="truncate">{lead.company}</span>
+            </p>
+          ) : null}
         </div>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              aria-label={`Ações para ${lead.name}`}
-              className="text-paper-fade hover:text-paper hover:bg-ink-700 -mr-1 -mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-sm opacity-0 transition-all group-hover:opacity-100"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <MoreHorizontal className="h-3.5 w-3.5" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem asChild>
-              <Link href={`/leads/${lead.id}`}>
-                <Eye className="mr-2 h-3.5 w-3.5" />
-                Ver detalhes
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => onEdit?.(lead)}>
-              <Pencil className="mr-2 h-3.5 w-3.5" />
-              Editar
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-negative focus:text-negative"
-              onSelect={() => {
-                if (window.confirm(`Excluir "${lead.name}"?`)) onDelete?.(lead)
-              }}
-            >
-              <Trash2 className="mr-2 h-3.5 w-3.5" />
-              Excluir
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
-      <footer className="border-t-ink-700 mt-3 flex items-center justify-between gap-2 border-t pt-2">
-        {lead.owner_id ? (
-          <span
-            aria-label="Responsável"
-            className="bg-signal-bg text-signal border-signal-deep flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-mono text-2xs font-semibold"
-            title={lead.owner_id}
-          >
-            {initials(lead.owner_id.slice(0, 2))}
-          </span>
-        ) : (
-          <span className="text-paper-fade text-2xs uppercase tracking-[0.12em]">
-            Sem dono
-          </span>
-        )}
+      {lead.job_title ? (
+        <p className="mb-3 truncate text-xs" style={{ color: 'var(--text-secondary)' }}>
+          {lead.job_title}
+        </p>
+      ) : null}
 
-        <div className="flex items-center gap-2">
-          {lead.source ? (
-            <span className="text-paper-quiet truncate font-mono text-2xs uppercase tracking-[0.12em]">
-              {lead.source}
-            </span>
-          ) : null}
-          <span className={`num-tabular text-2xs font-medium ${ageTone}`}>
-            {days}d
-          </span>
-        </div>
-      </footer>
-    </article>
+      {/* Actions */}
+      <div className="flex items-center gap-1.5">
+        <Link
+          href={`/leads/${lead.id}`}
+          className="inline-flex min-h-[36px] items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors"
+          style={{
+            backgroundColor: 'var(--bg-overlay)',
+            color: 'var(--text-secondary)',
+            border: '1px solid var(--border-dim)',
+          }}
+        >
+          <Eye className="h-3 w-3" />
+          Ver
+        </Link>
+        <button
+          type="button"
+          onClick={() => onEdit?.(lead)}
+          className="inline-flex min-h-[36px] items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors"
+          style={{
+            backgroundColor: 'var(--bg-overlay)',
+            color: 'var(--text-secondary)',
+            border: '1px solid var(--border-dim)',
+          }}
+        >
+          <Pencil className="h-3 w-3" />
+          Editar
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (window.confirm(`Excluir "${lead.name}"?`)) onDelete?.(lead)
+          }}
+          className="inline-flex min-h-[36px] items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors"
+          style={{
+            backgroundColor: 'rgba(239,68,68,0.08)',
+            color: 'var(--error)',
+            border: '1px solid rgba(239,68,68,0.2)',
+          }}
+        >
+          <Trash2 className="h-3 w-3" />
+          Excluir
+        </button>
+      </div>
+
+      {/* Amber left glow on hover */}
+      <div
+        className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
+        style={{ backgroundColor: 'var(--amber)' }}
+      />
+    </div>
   )
 }

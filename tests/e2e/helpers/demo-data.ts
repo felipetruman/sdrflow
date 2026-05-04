@@ -1,4 +1,4 @@
-export const DEMO_CREDENTIALS = { email: 'demo@sdrflow.ai', password: process.env.E2E_PASSWORD ?? 'demo123' } // gitguardian:ignore
+export const DEMO_CREDENTIALS = { email: 'demo@sdrflow.ai', password: 'demo123' }
 
 export const DEMO_STAGES = [
   { id: '11111111-1111-4111-8111-111111111111', name: 'Base', order: 1 },
