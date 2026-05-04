@@ -34,6 +34,9 @@ export async function inviteWorkspaceMember(input: Input): Promise<{ error?: str
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     if (!supabaseUrl) return { error: 'URL do Supabase não configurada' }
 
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!supabaseAnonKey) return { error: 'Chave pública do Supabase não configurada' }
+
     const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
     const adminClient = createSupabaseClient(supabaseUrl, serviceRoleKey)
 

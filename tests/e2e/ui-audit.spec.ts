@@ -2,8 +2,7 @@ import { test, type Page } from '@playwright/test'
 import fs from 'node:fs'
 import path from 'node:path'
 
-const baseURL = 'http://127.0.0.1:3000'
-const outDir = '/home/freedom/freedomdigitalhub/workspace/products/sdrflow/images'
+const outDir = path.join(process.cwd(), 'images')
 const logFile = path.join(outDir, 'ui-audit.log')
 const email = process.env.E2E_EMAIL
 const password = process.env.E2E_PASSWORD
@@ -20,6 +19,7 @@ async function capture(page: Page, name: string) {
 }
 
 test('audit UI pages and collect logs', async ({ page }) => {
+  fs.mkdirSync(outDir, { recursive: true })
   fs.writeFileSync(logFile, `UI audit started ${new Date().toISOString()}\n`)
 
   page.on('console', msg => append(`[console:${msg.type()}] ${msg.text()}`))
@@ -29,7 +29,7 @@ test('audit UI pages and collect logs', async ({ page }) => {
     if (res.status() >= 400) append(`[response:${res.status()}] ${res.request().method()} ${res.url()}`)
   })
 
-  await page.goto(`${baseURL}/login`, { waitUntil: 'networkidle' })
+  await page.goto('/login', { waitUntil: 'networkidle' })
   await capture(page, '01-login')
 
   const inputs = page.locator('input')
@@ -48,12 +48,12 @@ test('audit UI pages and collect logs', async ({ page }) => {
   }
 
   const pages = [
-    ['dashboard', `${baseURL}/dashboard`],
-    ['kanban', `${baseURL}/kanban`],
-    ['campaigns', `${baseURL}/campaigns`],
-    ['settings-fields', `${baseURL}/settings/fields`],
-    ['settings-funnel', `${baseURL}/settings/funnel`],
-    ['leads-new', `${baseURL}/leads/new`],
+    ['dashboard', '/dashboard'],
+    ['kanban', '/kanban'],
+    ['campaigns', '/campaigns'],
+    ['settings-fields', '/settings/fields'],
+    ['settings-funnel', '/settings/funnel'],
+    ['leads-new', '/leads/new'],
   ] as const
 
   for (const [name, url] of pages) {
@@ -61,12 +61,12 @@ test('audit UI pages and collect logs', async ({ page }) => {
     await capture(page, `page-${name}`)
   }
 
-  await page.goto(`${baseURL}/kanban`, { waitUntil: 'networkidle' })
+  await page.goto('/kanban', { waitUntil: 'networkidle' })
   const leadLinks = page.locator('a[href*="/leads/"]')
   if (await leadLinks.count()) {
     const href = await leadLinks.first().getAttribute('href')
     if (href) {
-      await page.goto(`${baseURL}${href}`, { waitUntil: 'networkidle' })
+      await page.goto(href, { waitUntil: 'networkidle' })
       await capture(page, 'page-lead-detail')
     }
   }

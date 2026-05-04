@@ -18,6 +18,7 @@ export function LeadCard({ lead, onEdit, onDelete }: Props) {
 
   return (
     <div
+      data-lead-card
       ref={setNodeRef}
       style={{
         transform: CSS.Transform.toString(transform),

@@ -97,6 +97,7 @@ export function AppSidebar({ open, onClose }: { open: boolean; onClose: () => vo
                 key={item.href}
                 href={item.href}
                 onClick={onClose}
+                aria-current={active ? 'page' : undefined}
                 className={`flex items-center gap-2.5 rounded-lg py-2 text-sm font-medium transition-all ${
                   active ? 'text-white' : 'hover:text-white'
                 }`}
@@ -142,6 +143,7 @@ export function AppSidebar({ open, onClose }: { open: boolean; onClose: () => vo
                 key={item.href}
                 href={item.href}
                 onClick={onClose}
+                aria-current={active ? 'page' : undefined}
                 className={`flex items-center gap-2.5 rounded-lg py-2 text-sm font-medium transition-all ${
                   active ? 'text-white' : 'hover:text-white'
                 }`}

@@ -3,7 +3,7 @@ import type { SupabaseClientLike, SupabaseQueryBuilder, SupabaseRow, SupabaseTab
 
 const createChain = <T>(table: string): SupabaseQueryBuilder<T> => {
   const chain: SupabaseQueryBuilder<T> = {
-    then: (onfulfilled, onrejected) => Promise.resolve({ data: [] as T[] | null, error: null }).then(onfulfilled, onrejected),
+    then: (onfulfilled, onrejected) => Promise.resolve({ data: [] as T[] | null, error: null, count: null }).then(onfulfilled, onrejected),
     select: () => chain,
     eq: () => chain,
     in: () => chain,

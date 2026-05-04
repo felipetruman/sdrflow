@@ -64,20 +64,20 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
     const ago7Ts = nowTs - 7 * 24 * 60 * 60 * 1000
     const ago30Ts = nowTs - 30 * 24 * 60 * 60 * 1000
 
-    const [leads, stageRows, activeCampaigns, generated, sent, msgByCampaign, funnelStagesRaw] = (await Promise.all([
-      supabase.from('leads').select('id').eq('workspace_id', workspaceId),
+    const [leadsCount, stageRows, activeCampaignsCount, generatedCount, sentCount, msgByCampaign, funnelStagesRaw] = (await Promise.all([
+      supabase.from('leads').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId),
       supabase.from('leads').select('stage_id, stage:funnel_stages(name), created_at').eq('workspace_id', workspaceId),
-      supabase.from('campaigns').select('id').eq('workspace_id', workspaceId).eq('status', 'active'),
-      supabase.from('generated_messages').select('id').eq('workspace_id', workspaceId),
-      supabase.from('generated_messages').select('id').eq('workspace_id', workspaceId).eq('status', 'sent'),
+      supabase.from('campaigns').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId).eq('status', 'active'),
+      supabase.from('generated_messages').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId),
+      supabase.from('generated_messages').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId).eq('status', 'sent'),
       supabase.from('generated_messages').select('campaign_id, campaign:campaigns(name)').eq('workspace_id', workspaceId),
       supabase.from('funnel_stages').select('id, name, order_index').eq('workspace_id', workspaceId).order('order_index', { ascending: true }),
     ])) as unknown as [
+      { data: null; error: unknown; count: number | null },
       { data: unknown[] | null },
-      { data: unknown[] | null },
-      { data: unknown[] | null },
-      { data: unknown[] | null },
-      { data: unknown[] | null },
+      { data: null; error: unknown; count: number | null },
+      { data: null; error: unknown; count: number | null },
+      { data: null; error: unknown; count: number | null },
       { data: unknown[] | null },
       { data: unknown[] | null },
     ]
@@ -114,11 +114,11 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
     }
 
     return {
-      totalLeads: ((leads.data ?? []) as unknown[]).length,
+      totalLeads: leadsCount.count ?? 0,
       leadsByStage: Array.from(leadsByStageMap.values()),
-      activeCampaigns: ((activeCampaigns.data ?? []) as unknown[]).length,
-      totalMessagesGenerated: ((generated.data ?? []) as unknown[]).length,
-      totalMessagesSent: ((sent.data ?? []) as unknown[]).length,
+      activeCampaigns: activeCampaignsCount.count ?? 0,
+      totalMessagesGenerated: generatedCount.count ?? 0,
+      totalMessagesSent: sentCount.count ?? 0,
       leadsLast7Days,
       leadsLast30Days,
       messagesByCampaign,

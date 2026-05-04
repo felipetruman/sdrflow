@@ -14,6 +14,7 @@ type Props = {
 export function KanbanColumn({ stage, leads, onEditLead, onDeleteLead }: Props) {
   return (
     <div
+      data-kanban-column
       className="flex w-full min-w-[272px] flex-col rounded-xl p-3"
       style={{
         backgroundColor: 'var(--bg-surface)',

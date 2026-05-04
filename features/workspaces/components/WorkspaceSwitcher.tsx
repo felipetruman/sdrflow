@@ -57,7 +57,7 @@ export function WorkspaceSwitcher({ current }: WorkspaceSwitcherProps) {
     }
   }
 
-  if (loaded && workspaces.length <= 1) return null
+  if (loaded && workspaces.length <= 1 && !loading) return null
 
   return (
     <div className="relative">

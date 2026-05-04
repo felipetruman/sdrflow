@@ -13,8 +13,8 @@ export type SupabaseError = { message: string }
 export type SupabaseQueryResult<T> = Promise<{ data: T | null; error: SupabaseError | null }>
 
 export interface SupabaseQueryBuilder<T> {
-  then<TResult1 = { data: T[] | null; error: unknown }, TResult2 = never>(
-    onfulfilled?: ((value: { data: T[] | null; error: unknown }) => TResult1 | PromiseLike<TResult1>) | null,
+  then<TResult1 = { data: T[] | null; error: unknown; count?: number | null }, TResult2 = never>(
+    onfulfilled?: ((value: { data: T[] | null; error: unknown; count?: number | null }) => TResult1 | PromiseLike<TResult1>) | null,
     onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null,
   ): PromiseLike<TResult1 | TResult2>
   select(columns?: string, options?: { count?: 'exact'; head?: boolean }): SupabaseQueryBuilder<T>

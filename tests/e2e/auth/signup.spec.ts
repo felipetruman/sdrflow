@@ -9,7 +9,7 @@ test.describe('Signup', () => {
     await page.getByRole('button', { name: /Criar conta/ }).click()
     // In demo mode, signUp returns {} — success message appears then redirects
     await expect(
-      page.getByText('Conta criada. Redirecionando para o login...')
+      page.getByText('Conta criada. Redirecionando...')
     ).toBeVisible({ timeout: 5000 })
   })
 

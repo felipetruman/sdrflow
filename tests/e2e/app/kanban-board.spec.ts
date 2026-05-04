@@ -7,8 +7,7 @@ test.describe('Kanban board', () => {
   })
 
   test('renders 7 stage columns with stage names', async ({ authenticatedPage: page }) => {
-    // Each column has an h3 with the stage name and a count badge
-    const columns = page.locator('.rounded-2xl.bg-slate-50')
+    const columns = page.locator('[data-kanban-column]')
     await expect(columns).toHaveCount(7)
   })
 
@@ -16,26 +15,20 @@ test.describe('Kanban board', () => {
     const searchInput = page.getByPlaceholder('Buscar por nome, email ou empresa')
     await searchInput.fill('Marina')
 
-    // Marina should be visible
     await expect(page.getByText('Marina Almeida')).toBeVisible()
-
-    // Other leads should not be visible — Rafael should be hidden
     await expect(page.getByText('Rafael Souza')).not.toBeVisible()
   })
 
   test('stage filter shows only leads in selected stage', async ({ authenticatedPage: page }) => {
-    // Select the second stage in the dropdown (first real stage after "Todas as etapas")
-    const stageSelects = page.locator('select')
-    const stageSelect = stageSelects.nth(0) // stage filter is the first select
+    const stageSelect = page.locator('select').nth(0)
     await stageSelect.selectOption({ index: 1 })
 
-    // After selecting a stage, leads count should update
     const leadsText = page.getByText(/leads encontrados/)
     await expect(leadsText).toBeVisible()
   })
 
   test('owner filter shows only leads for selected owner', async ({ authenticatedPage: page }) => {
-    const ownerSelect = page.locator('select').nth(1) // owner filter is the second select
+    const ownerSelect = page.locator('select').nth(1)
     await ownerSelect.selectOption({ index: 1 })
 
     const leadsText = page.getByText(/leads encontrados/)
@@ -43,11 +36,10 @@ test.describe('Kanban board', () => {
   })
 
   test('sort by name orders leads alphabetically', async ({ authenticatedPage: page }) => {
-    const sortSelect = page.locator('select').nth(2) // sort is the third select
+    const sortSelect = page.locator('select').nth(2)
     await sortSelect.selectOption('nome')
 
-    // All lead cards should still be visible
-    const leadCards = page.locator('.rounded-xl.border.border-slate-200.bg-white')
+    const leadCards = page.locator('[data-lead-card]')
     const count = await leadCards.count()
     expect(count).toBeGreaterThanOrEqual(1)
   })
@@ -56,33 +48,25 @@ test.describe('Kanban board', () => {
     const sortSelect = page.locator('select').nth(2)
     await sortSelect.selectOption('empresa')
 
-    const leadCards = page.locator('.rounded-xl.border.border-slate-200.bg-white')
+    const leadCards = page.locator('[data-lead-card]')
     const count = await leadCards.count()
     expect(count).toBeGreaterThanOrEqual(1)
   })
 
   test('clear filters button resets all filters', async ({ authenticatedPage: page }) => {
-    // Apply a search filter first
     const searchInput = page.getByPlaceholder('Buscar por nome, email ou empresa')
     await searchInput.fill('Marina')
     await expect(page.getByText('Marina Almeida')).toBeVisible()
 
-    // Click Limpar button
     await page.getByRole('button', { name: /Limpar/ }).click()
 
-    // Search input should be empty
     await expect(searchInput).toHaveValue('')
-
-    // All leads should be back
     const leadsText = page.getByText(/leads encontrados/)
     await expect(leadsText).toBeVisible()
   })
 
-  test('kanban columns have drag handles on lead cards', async ({ authenticatedPage: page }) => {
-    // Verify GripVertical icons exist (drag handles) — dnd-kit uses these
-    const gripHandles = page.locator('[data-testid] svg, .rounded-xl.border svg.lucide-grip-vertical').first()
-    // Lead cards render with a grip handle area via listeners
-    const leadCards = page.locator('.rounded-xl.border.border-slate-200.bg-white')
+  test('kanban columns have lead cards', async ({ authenticatedPage: page }) => {
+    const leadCards = page.locator('[data-lead-card]')
     await expect(leadCards.first()).toBeVisible()
   })
 
@@ -90,7 +74,6 @@ test.describe('Kanban board', () => {
     const leadsText = page.getByText(/\d+ leads encontrados/)
     await expect(leadsText).toBeVisible()
 
-    // Should show at least 6 leads (demo data)
     const text = await leadsText.textContent()
     const match = text?.match(/(\d+)/)
     expect(match).toBeTruthy()

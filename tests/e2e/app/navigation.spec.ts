@@ -43,18 +43,15 @@ test.describe('Sidebar navigation', () => {
     await expect(page.getByRole('heading', { name: 'Membros do Workspace', exact: true })).toBeVisible()
   })
 
-  test('highlights active nav item with bg-slate-800', async ({ authenticatedPage: page }) => {
-    // Active link has text-white; inactive has text-slate-400 hover:bg-slate-800
+  test('highlights active nav item via aria-current', async ({ authenticatedPage: page }) => {
     const dashboardLink = page.getByRole('link', { name: 'Dashboard' })
-    await expect(dashboardLink).toHaveClass(/text-white/)
+    await expect(dashboardLink).toHaveAttribute('aria-current', 'page')
 
-    // Navigate to Kanban — Kanban should become active
     await page.getByRole('link', { name: 'Kanban' }).click()
     const kanbanLink = page.getByRole('link', { name: 'Kanban' })
-    await expect(kanbanLink).toHaveClass(/text-white/)
+    await expect(kanbanLink).toHaveAttribute('aria-current', 'page')
 
-    // Dashboard should no longer be active (switches to text-slate-400)
     const dashboardLinkAgain = page.getByRole('link', { name: 'Dashboard' })
-    await expect(dashboardLinkAgain).toHaveClass(/text-slate-400/)
+    await expect(dashboardLinkAgain).not.toHaveAttribute('aria-current')
   })
 })

@@ -9,8 +9,8 @@ test.describe('Dashboard page', () => {
     // 4 metric cards
     await expect(page.getByText('Total Leads')).toBeVisible()
     await expect(page.getByText('Campanhas Ativas')).toBeVisible()
-    await expect(page.getByText('Mensagens Geradas')).toBeVisible()
-    await expect(page.getByText('Mensagens Enviadas')).toBeVisible()
+    await expect(page.getByText('Msgs Geradas')).toBeVisible()
+    await expect(page.getByText('Msgs Enviadas')).toBeVisible()
   })
 
   test('shows Leads por estágio section with stage names', async ({ authenticatedPage: page }) => {

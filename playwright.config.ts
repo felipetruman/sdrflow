@@ -15,14 +15,14 @@ export default defineConfig({
     ['junit', { outputFile: 'playwright-results.xml' }],
   ],
   use: {
-    baseURL: process.env.BASE_URL ?? 'http://127.0.0.1:3010',
+    baseURL: process.env.BASE_URL ?? 'http://127.0.0.1:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
   webServer: {
     command: 'USE_DEMO_MODE=true pnpm dev',
-    url: process.env.BASE_URL ? `${process.env.BASE_URL}/login` : 'http://127.0.0.1:3010/login',
+    url: process.env.BASE_URL ? `${process.env.BASE_URL}/login` : 'http://127.0.0.1:3000/login',
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
     env: {
