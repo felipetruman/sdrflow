@@ -81,7 +81,7 @@ export default function ResetPasswordPage() {
               id="reset-password"
               type="password"
               placeholder="Mínimo 6 caracteres"
-              className="sdr-input py-2.5 pl-10 pr-3"
+              className="field py-2.5 pl-10 pr-3"
               {...register('password')}
             />
           </div>
@@ -107,7 +107,7 @@ export default function ResetPasswordPage() {
               id="reset-confirm"
               type="password"
               placeholder="Repita a senha"
-              className="sdr-input py-2.5 pl-10 pr-3"
+              className="field py-2.5 pl-10 pr-3"
               {...register('confirmPassword')}
             />
           </div>

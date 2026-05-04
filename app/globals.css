@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Default padding for .field. Wrapped in :where() so its specificity is zero,
+   which lets per-element Tailwind utilities (e.g. pl-9 for leading icons)
+   override without source-order or layer surprises. Lives outside @layer so
+   Tailwind's @apply does not inline padding into alias rules. */
+:where(.field) {
+  padding: 10px 12px;
+}
+
 /* ─── Editorial Noir — Design Tokens ─────────────────────────────────────── */
 :root {
   /* Foundation — warm graphite (slightly cooler than pure black) */
@@ -325,7 +333,9 @@
     color: var(--paper);
   }
 
-  /* Form input — underline-first editorial style */
+  /* Form input — underline-first editorial style.
+     Padding declared longhand and inside @layer components below so JSX-level
+     padding utilities (pl-9 for leading icons) can override per element. */
   .field {
     width: 100%;
     background-color: var(--ink-900);
@@ -333,7 +343,6 @@
     color: var(--paper);
     border-radius: var(--radius-sm);
     font-size: var(--text-sm);
-    padding: 10px 12px;
     transition: border-color 150ms ease, box-shadow 150ms ease;
   }
   .field:focus {
@@ -348,7 +357,6 @@
   }
 
   /* Legacy aliases — keep until migration sweep done */
-  .sdr-input { @apply field; }
   .btn-amber { @apply btn-signal; }
   .glass {
     background: rgba(17, 19, 26, 0.78);
