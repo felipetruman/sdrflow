@@ -1,8 +1,8 @@
 import http from 'k6/http'
 import { check, sleep, group } from 'k6'
 import { Trend } from 'k6/metrics'
-import { login, authHeaders } from '../helpers/auth.js'
-import { getStages } from '../helpers/data-seed.js'
+import { authHeaders } from '../helpers/auth.js'
+import { setupWithStages } from '../helpers/setup.js'
 import { BASE_URL, scenarios, thresholds } from '../config.js'
 
 const leadCreationDuration = new Trend('lead_creation_duration')
@@ -17,19 +17,8 @@ export const options = {
   },
 }
 
-const TEST_USER_EMAIL = __ENV.TEST_USER_EMAIL
-const TEST_USER_PASSWORD = __ENV.TEST_USER_PASSWORD
-const WORKSPACE_ID = __ENV.WORKSPACE_ID
-
 export function setup() {
-  if (!TEST_USER_EMAIL || !TEST_USER_PASSWORD) {
-    throw new Error('Missing TEST_USER_EMAIL or TEST_USER_PASSWORD env vars')
-  }
-  const auth = login(TEST_USER_EMAIL, TEST_USER_PASSWORD)
-  if (!auth) throw new Error('Login failed')
-  const stages = getStages(auth.token, WORKSPACE_ID)
-  const baseStage = stages.find(s => s.name === 'Base')
-  return { token: auth.token, workspaceId: WORKSPACE_ID, baseStageId: baseStage?.id }
+  return setupWithStages()
 }
 
 export default function (data) {

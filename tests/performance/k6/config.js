@@ -1,7 +1,19 @@
-export const SUPABASE_URL = __ENV.SUPABASE_URL || 'https://kjxvjqadoefbvzxymgff.supabase.co'
-export const ANON_KEY = __ENV.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqeHZqcWFkb2VmYnZ6eHltZ2ZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NjI1MzQsImV4cCI6MjA5MzEzODUzNH0.vd2pzyj1v_RENZLjN7m9fZxW1d08BqwUyrlcRv3-flo'
+function requireEnv(name) {
+  const value = __ENV[name]
+  if (!value) {
+    throw new Error(`Missing required env var: ${name}. Set with -e ${name}=<value> or export ${name}=<value>`)
+  }
+  return value
+}
+
+export const SUPABASE_URL = __ENV.SUPABASE_URL || 'http://localhost:54321'
+export const ANON_KEY = __ENV.SUPABASE_ANON_KEY || '<anong-key-from-supabase-dashboard>'
 export const SERVICE_KEY = __ENV.SUPABASE_SERVICE_KEY || ''
 export const APP_URL = __ENV.APP_URL || 'http://localhost:3000'
+
+export function requireServiceKey() {
+  return requireEnv('SUPABASE_SERVICE_KEY')
+}
 export const BASE_URL = `${SUPABASE_URL}/rest/v1`
 
 export const thresholds = {

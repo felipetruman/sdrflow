@@ -1,7 +1,8 @@
 import http from 'k6/http'
 import { check, group, sleep } from 'k6'
 import { Trend } from 'k6/metrics'
-import { login, authHeaders } from '../helpers/auth.js'
+import { authHeaders } from '../helpers/auth.js'
+import { setupBaseAuth } from '../helpers/setup.js'
 import { BASE_URL, scenarios } from '../config.js'
 
 const kanbanDuration = new Trend('kanban_duration')
@@ -17,17 +18,8 @@ export const options = {
   },
 }
 
-const TEST_USER_EMAIL = __ENV.TEST_USER_EMAIL
-const TEST_USER_PASSWORD = __ENV.TEST_USER_PASSWORD
-const WORKSPACE_ID = __ENV.WORKSPACE_ID
-
 export function setup() {
-  if (!TEST_USER_EMAIL || !TEST_USER_PASSWORD) {
-    throw new Error('Missing credentials')
-  }
-  const auth = login(TEST_USER_EMAIL, TEST_USER_PASSWORD)
-  if (!auth) throw new Error('Login failed')
-  return { token: auth.token, workspaceId: WORKSPACE_ID }
+  return setupBaseAuth()
 }
 
 export default function (data) {

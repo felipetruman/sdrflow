@@ -1,8 +1,9 @@
 import http from 'k6/http'
 import { check, group } from 'k6'
 import { Trend, Rate } from 'k6/metrics'
-import { login, authHeaders } from '../helpers/auth.js'
-import { getRandomLead, getCampaigns } from '../helpers/data-seed.js'
+import { authHeaders } from '../helpers/auth.js'
+import { getRandomLead } from '../helpers/data-seed.js'
+import { setupWithCampaigns } from '../helpers/setup.js'
 import { SUPABASE_URL, scenarios } from '../config.js'
 
 const llmDuration = new Trend('llm_generation_duration')
@@ -17,18 +18,8 @@ export const options = {
   },
 }
 
-const TEST_USER_EMAIL = __ENV.TEST_USER_EMAIL
-const TEST_USER_PASSWORD = __ENV.TEST_USER_PASSWORD
-const WORKSPACE_ID = __ENV.WORKSPACE_ID
-
 export function setup() {
-  if (!TEST_USER_EMAIL || !TEST_USER_PASSWORD) {
-    throw new Error('Missing credentials')
-  }
-  const auth = login(TEST_USER_EMAIL, TEST_USER_PASSWORD)
-  if (!auth) throw new Error('Login failed')
-  const campaigns = getCampaigns(auth.token, WORKSPACE_ID)
-  return { token: auth.token, workspaceId: WORKSPACE_ID, campaignId: campaigns[0]?.id }
+  return setupWithCampaigns()
 }
 
 export default function (data) {

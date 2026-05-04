@@ -3,14 +3,17 @@ module.exports = {
     collect: {
       url: [
         'http://localhost:3000/login',
-        'http://localhost:3000/dashboard',
-        'http://localhost:3000/leads',
-        'http://localhost:3000/campaigns',
+        'http://localhost:3000/dashboard?demo=1',
+        'http://localhost:3000/leads?demo=1',
+        'http://localhost:3000/campaigns?demo=1',
       ],
       numberOfRuns: 2,
       settings: {
         preset: 'desktop',
         chromeFlags: '--no-sandbox',
+        extraHeaders: JSON.stringify({
+          Cookie: 'sdrflow-demo-auth=true',
+        }),
       },
     },
     assert: {

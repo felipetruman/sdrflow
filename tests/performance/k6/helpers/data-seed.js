@@ -13,7 +13,7 @@ export function getRandomLead(token, workspaceId) {
 
 export function getStages(token, workspaceId) {
   const res = http.get(
-    `${BASE_URL}/pipeline_stages?workspace_id=eq.${workspaceId}&order=position.asc`,
+    `${BASE_URL}/funnel_stages?workspace_id=eq.${workspaceId}&order=order_index.asc`,
     { headers: authHeaders(token) }
   )
   if (res.status !== 200) return []

@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "deploy:prod": "bash scripts/deploy.sh",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:list": "playwright test --list"
   },
