@@ -16,3 +16,8 @@ playwright-results.xml
 *.xml
 .vercel
 /images
+.claude/
+.commandcode/
+.opencode/
+screenshots/
+scripts/screenshots.mjs

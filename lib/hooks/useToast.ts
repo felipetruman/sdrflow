@@ -1,10 +1,15 @@
 'use client'
 
-import { ToastContext } from '@/components/ToastProvider'
-import { useContext } from 'react'
+import { toast as sonner } from 'sonner'
+
+const api = {
+  toast: {
+    success: (message: string) => sonner.success(message),
+    error:   (message: string) => sonner.error(message),
+    info:    (message: string) => sonner.message(message),
+  },
+}
 
 export function useToast() {
-  const context = useContext(ToastContext)
-  if (!context) throw new Error('useToast must be used within ToastProvider')
-  return context
+  return api
 }

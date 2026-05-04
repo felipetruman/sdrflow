@@ -21,6 +21,7 @@ export interface SupabaseQueryBuilder<T> {
   eq(column: string, value: string): SupabaseQueryBuilder<T>
   in(column: string, values: string[]): SupabaseQueryBuilder<T>
   order(column: string, options?: { ascending?: boolean }): SupabaseQueryBuilder<T>
+  limit(count: number): SupabaseQueryBuilder<T>
   maybeSingle(): SupabaseQueryResult<T>
   single(): SupabaseQueryResult<T>
   insert(values: unknown): SupabaseQueryBuilder<T>
@@ -36,6 +37,8 @@ export interface SupabaseClientLike {
     signInWithPassword(credentials: { email: string; password: string }): Promise<{ data: unknown; error: SupabaseError | null }>
     signUp(credentials: { email: string; password: string }): Promise<{ data: unknown; error: SupabaseError | null }>
     signOut(): Promise<{ error: SupabaseError | null }>
+    resetPasswordForEmail(email: string, options?: { redirectTo?: string }): Promise<{ data: unknown; error: SupabaseError | null }>
+    updateUser(attributes: { password?: string }): Promise<{ data: unknown; error: SupabaseError | null }>
   }
   from<T extends SupabaseTableName>(table: T): SupabaseQueryBuilder<SupabaseRow<T>>
   functions: {

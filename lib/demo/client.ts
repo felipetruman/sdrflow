@@ -8,6 +8,7 @@ const createChain = <T>(table: string): SupabaseQueryBuilder<T> => {
     eq: () => chain,
     in: () => chain,
     order: () => chain,
+    limit: () => chain,
     maybeSingle: async () => ({
       data: table === 'workspace_members' ? ({ workspace_id: demoStore.getState().workspace.id, workspaces: demoStore.getState().workspace } as unknown as T) : null,
       error: null,
@@ -23,7 +24,7 @@ const createChain = <T>(table: string): SupabaseQueryBuilder<T> => {
 
 export function createDemoClient(): SupabaseClientLike {
   return {
-    auth: { getUser: async () => ({ data: { user: { id: 'demo-user', email: 'demo@sdrflow.ai' } }, error: null }), getSession: async () => ({ data: { session: { user: { id: 'demo-user', email: 'demo@sdrflow.ai' }, access_token: 'demo-token' } }, error: null }), signInWithPassword: async () => ({ data: null, error: null }), signUp: async () => ({ data: null, error: null }), signOut: async () => ({ error: null }) },
+    auth: { getUser: async () => ({ data: { user: { id: 'demo-user', email: 'demo@sdrflow.ai' } }, error: null }), getSession: async () => ({ data: { session: { user: { id: 'demo-user', email: 'demo@sdrflow.ai' }, access_token: 'demo-token' } }, error: null }), signInWithPassword: async () => ({ data: null, error: null }), signUp: async () => ({ data: null, error: null }), signOut: async () => ({ error: null }), resetPasswordForEmail: async () => ({ data: null, error: null }), updateUser: async () => ({ data: null, error: null }) },
     from: <T extends SupabaseTableName>(table: T) => createChain<SupabaseRow<T>>(table),
     functions: { invoke: async () => ({ data: null, error: null }) },
     rpc: async () => ({ data: null, error: null }),

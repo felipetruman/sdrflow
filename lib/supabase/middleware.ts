@@ -44,7 +44,7 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  const publicRoutes = ['/', '/login', '/signup']
+  const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/reset-password']
   const isPublicRoute = publicRoutes.some((r) => pathname.startsWith(r))
 
   if (!user && !isPublicRoute) {

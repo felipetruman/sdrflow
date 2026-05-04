@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Syne, DM_Sans, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
-import { ToastProvider } from '@/components/ToastProvider'
+import { Toaster } from '@/components/ui/sonner'
 
 const syne = Syne({
   subsets: ['latin'],
@@ -46,9 +46,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
-      <body className="font-sans antialiased">
-        <ToastProvider>{children}</ToastProvider>
+    <html lang="pt-BR" className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable} dark`}>
+      <body className="bg-ink-950 text-paper font-sans antialiased">
+        {children}
+        <Toaster />
       </body>
     </html>
   )
