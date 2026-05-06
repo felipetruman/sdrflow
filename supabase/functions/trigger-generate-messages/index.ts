@@ -106,6 +106,7 @@ ${customFieldsText}`
     const llmBaseUrl = Deno.env.get('LLM_BASE_URL') || 'https://api.openai.com/v1'
 
     let messages: string[] = []
+    let source: 'llm' | 'fallback' = 'fallback'
 
     if (llmApiKey) {
       try {
@@ -129,6 +130,7 @@ ${customFieldsText}`
           const parsed = JSON.parse(jsonMatch[0])
           if (Array.isArray(parsed.messages) && parsed.messages.length >= 2) {
             messages = parsed.messages.slice(0, 3)
+            source = 'llm'
           }
         }
       } catch (llmErr) {
@@ -169,11 +171,11 @@ ${customFieldsText}`
       lead_id: leadId,
       workspace_id: lead.workspace_id,
       type: 'message_generated',
-      metadata: { campaign_id: campaignId, generation_type: 'trigger', auto: true },
+      metadata: { campaign_id: campaignId, generation_type: 'trigger', auto: true, source, model: source === 'llm' ? llmModel : null },
     })
 
     return new Response(
-      JSON.stringify({ messages: savedMessages || [] }),
+      JSON.stringify({ messages: savedMessages || [], source, model: source === 'llm' ? llmModel : null }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     )
   } catch (err: any) {

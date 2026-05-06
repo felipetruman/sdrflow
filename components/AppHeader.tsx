@@ -18,6 +18,7 @@ const ROUTE_TITLES: Record<string, { eyebrow: string; title: string }> = {
   '/settings/funnel':   { eyebrow: 'Configuração',    title: 'Funil' },
   '/settings/fields':   { eyebrow: 'Configuração',    title: 'Campos' },
   '/settings/members':  { eyebrow: 'Configuração',    title: 'Membros' },
+  '/settings/ai':       { eyebrow: 'Configuração',    title: 'Integração IA' },
 }
 
 function resolveRouteMeta(pathname: string): { eyebrow: string; title: string } {

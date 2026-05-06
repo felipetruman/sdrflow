@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Loader2, Sparkles } from 'lucide-react'
+import { Loader2, Sparkles, Cpu, FileText } from 'lucide-react'
 import { getActiveCampaigns } from '@/features/campaigns/queries/getActiveCampaigns'
 import { generateMessages } from '@/features/ai-messages/actions/generateMessages'
 import { GeneratedMessageCard } from './GeneratedMessageCard'
@@ -11,11 +11,15 @@ interface GenerateMessagesPanelProps {
   leadId: string
 }
 
+type GenerationSource = 'llm' | 'fallback' | 'demo'
+
 export function GenerateMessagesPanel({ leadId }: GenerateMessagesPanelProps) {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [selectedCampaignId, setSelectedCampaignId] = useState('')
   const [messages, setMessages] = useState<GeneratedMessage[]>([])
   const [loading, setLoading] = useState(false)
+  const [source, setSource] = useState<GenerationSource | null>(null)
+  const [model, setModel] = useState<string | null>(null)
 
   useEffect(() => {
     void getActiveCampaigns().then((items) => {
@@ -28,7 +32,11 @@ export function GenerateMessagesPanel({ leadId }: GenerateMessagesPanelProps) {
     if (!selectedCampaignId) return
     setLoading(true)
     const result = await generateMessages({ leadId, campaignId: selectedCampaignId })
-    if (result.messages) setMessages(result.messages)
+    if (result.messages) {
+      setMessages(result.messages)
+      setSource(result.source ?? null)
+      setModel(result.model ?? null)
+    }
     setLoading(false)
   }
 
@@ -80,12 +88,32 @@ export function GenerateMessagesPanel({ leadId }: GenerateMessagesPanelProps) {
 
       {messages.length > 0 ? (
         <div className="border-t-ink-700 mt-5 space-y-3 border-t pt-5">
-          <p className="eyebrow-quiet">Recém-gerado</p>
+          <div className="flex items-center justify-between">
+            <p className="eyebrow-quiet">Recém-gerado</p>
+            {source ? <SourceBadge source={source} model={model} /> : null}
+          </div>
           {messages.map((message) => (
             <GeneratedMessageCard key={message.id} message={message} />
           ))}
         </div>
       ) : null}
     </section>
+  )
+}
+
+function SourceBadge({ source, model }: { source: GenerationSource; model: string | null }) {
+  if (source === 'llm') {
+    return (
+      <span className="text-signal border-signal-deep inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase" style={{ backgroundColor: 'var(--signal-bg)' }}>
+        <Cpu className="h-2.5 w-2.5" aria-hidden />
+        IA · {model ?? 'modelo'}
+      </span>
+    )
+  }
+  return (
+    <span className="text-paper-quiet border-ink-700 bg-ink-900 inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase">
+      <FileText className="h-2.5 w-2.5" aria-hidden />
+      Template offline
+    </span>
   )
 }
