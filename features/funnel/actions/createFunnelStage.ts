@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getCurrentWorkspace } from '@/features/workspaces/queries/getCurrentWorkspace'
 import { getErrorMessage } from '@/lib/utils/errors'
 import { revalidatePath } from 'next/cache'
+import { demoStore, isDemoMode } from '@/lib/demo/data'
 
 type Input = { name: string; color?: string }
 
@@ -11,6 +12,12 @@ export async function createFunnelStage(input: Input): Promise<{ error?: string 
   try {
     const name = input.name.trim()
     if (!name || name.length > 100) return { error: 'Nome da etapa inválido (1-100 caracteres)' }
+    if (isDemoMode()) {
+      demoStore.addStage({ name, color: input.color })
+      revalidatePath('/kanban')
+      revalidatePath('/settings/funnel')
+      return {}
+    }
     const supabase = await createClient()
     const workspace = await getCurrentWorkspace()
     if (!workspace) return { error: 'Workspace não encontrado' }

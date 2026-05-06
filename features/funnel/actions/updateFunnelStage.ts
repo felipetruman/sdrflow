@@ -4,11 +4,19 @@ import { createClient } from '@/lib/supabase/server'
 import { getCurrentWorkspace } from '@/features/workspaces/queries/getCurrentWorkspace'
 import { getErrorMessage } from '@/lib/utils/errors'
 import { revalidatePath } from 'next/cache'
+import { demoStore, isDemoMode } from '@/lib/demo/data'
 
 type Input = { name: string; color?: string }
 
 export async function updateFunnelStage(id: string, input: Input): Promise<{ error?: string }> {
   try {
+    if (isDemoMode()) {
+      const result = demoStore.updateStage(id, input)
+      if (!result) return { error: 'Etapa não encontrada' }
+      revalidatePath('/kanban')
+      revalidatePath('/settings/funnel')
+      return {}
+    }
     const supabase = await createClient()
     const workspace = await getCurrentWorkspace()
     if (!workspace) return { error: 'Workspace não encontrado' }

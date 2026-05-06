@@ -4,9 +4,17 @@ import { createClient } from '@/lib/supabase/server'
 import { getCurrentWorkspace } from '@/features/workspaces/queries/getCurrentWorkspace'
 import { getErrorMessage } from '@/lib/utils/errors'
 import { revalidatePath } from 'next/cache'
+import { demoStore, isDemoMode } from '@/lib/demo/data'
 
 export async function deleteFunnelStage(id: string): Promise<{ error?: string }> {
   try {
+    if (isDemoMode()) {
+      const result = demoStore.deleteStage(id)
+      if ('error' in result) return { error: result.error }
+      revalidatePath('/kanban')
+      revalidatePath('/settings/funnel')
+      return {}
+    }
     const supabase = await createClient()
     const workspace = await getCurrentWorkspace()
     if (!workspace) return { error: 'Workspace não encontrado' }

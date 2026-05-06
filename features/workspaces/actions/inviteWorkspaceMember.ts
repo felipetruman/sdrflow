@@ -4,11 +4,16 @@ import { createClient } from '@/lib/supabase/server'
 import { getCurrentWorkspace } from '@/features/workspaces/queries/getCurrentWorkspace'
 import { getErrorMessage } from '@/lib/utils/errors'
 import { revalidatePath } from 'next/cache'
+import { isDemoMode } from '@/lib/demo/data'
 
 type Input = { email: string; role: 'admin' | 'member' }
 
 export async function inviteWorkspaceMember(input: Input): Promise<{ error?: string }> {
   try {
+    if (isDemoMode()) {
+      void input
+      return { error: 'Convite de membros disponível apenas no modo cloud (Supabase).' }
+    }
     const supabase = await createClient()
     const workspace = await getCurrentWorkspace()
     if (!workspace) return { error: 'Workspace não encontrado' }
