@@ -9,6 +9,7 @@ import { demoStore, isDemoMode } from '@/lib/demo/data'
 export async function deleteFunnelStage(id: string): Promise<{ error?: string }> {
   try {
     if (isDemoMode()) {
+      // demo mode: no auth context, mutations permitted by design (USE_DEMO_MODE flag)
       const result = demoStore.deleteStage(id)
       if ('error' in result) return { error: result.error }
       revalidatePath('/kanban')

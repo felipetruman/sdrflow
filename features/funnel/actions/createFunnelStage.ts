@@ -13,6 +13,7 @@ export async function createFunnelStage(input: Input): Promise<{ error?: string 
     const name = input.name.trim()
     if (!name || name.length > 100) return { error: 'Nome da etapa inválido (1-100 caracteres)' }
     if (isDemoMode()) {
+      // demo mode: no auth context, mutations permitted by design (USE_DEMO_MODE flag)
       demoStore.addStage({ name, color: input.color })
       revalidatePath('/kanban')
       revalidatePath('/settings/funnel')

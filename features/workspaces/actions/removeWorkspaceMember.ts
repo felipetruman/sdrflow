@@ -6,11 +6,14 @@ import { getErrorMessage } from '@/lib/utils/errors'
 import { revalidatePath } from 'next/cache'
 import { isDemoMode } from '@/lib/demo/data'
 
-export async function removeWorkspaceMember(memberId: string): Promise<{ error?: string }> {
+export type RemoveWorkspaceMemberResult = { error?: string; info?: string }
+
+export async function removeWorkspaceMember(memberId: string): Promise<RemoveWorkspaceMemberResult> {
   try {
     if (isDemoMode()) {
+      // demo mode: feature not supported — surface as info, not error
       void memberId
-      return { error: 'Remoção de membros disponível apenas no modo cloud (Supabase).' }
+      return { info: 'Remoção de membros disponível apenas no modo cloud (Supabase).' }
     }
     const supabase = await createClient()
     const workspace = await getCurrentWorkspace()

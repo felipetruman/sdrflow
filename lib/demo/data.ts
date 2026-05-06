@@ -92,6 +92,11 @@ export const createDemoState = (): DemoState => ({
 
 const state: DemoState = createDemoState()
 
+const randomId = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 export const demoStore = {
   getState: () => state,
   reset: () => Object.assign(state, createDemoState()),
@@ -137,48 +142,62 @@ export const demoStore = {
   deleteLead: (id: string) => { const index = state.leads.findIndex((item) => item.id === id); if (index === -1) return null; state.leads.splice(index, 1); return true },
   addStage: (input: { name: string; color?: string }) => {
     const maxOrder = state.stages.reduce((max, s) => Math.max(max, s.order_index), -1)
+    const timestamp = new Date().toISOString()
     const stage: FunnelStage = {
-      id: `stage-${Date.now()}`,
+      id: `stage-${randomId()}`,
       workspace_id: state.workspace.id,
       name: input.name,
       color: input.color ?? '#64748b',
       order_index: maxOrder + 1,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      created_at: timestamp,
+      updated_at: timestamp,
     }
-    state.stages.push(stage)
+    state.stages = [...state.stages, stage]
     return stage
   },
   updateStage: (id: string, payload: { name: string; color?: string }) => {
-    const stage = state.stages.find((s) => s.id === id)
-    if (!stage) return null
-    stage.name = payload.name
-    if (payload.color !== undefined) stage.color = payload.color
-    stage.updated_at = new Date().toISOString()
-    return stage
+    const exists = state.stages.some((s) => s.id === id)
+    if (!exists) return null
+    const updated_at = new Date().toISOString()
+    state.stages = state.stages.map((s) =>
+      s.id === id
+        ? { ...s, name: payload.name, color: payload.color !== undefined ? payload.color : s.color, updated_at }
+        : s,
+    )
+    return state.stages.find((s) => s.id === id) ?? null
   },
   deleteStage: (id: string) => {
     const leadsInStage = state.leads.filter((l) => l.stage_id === id).length
     if (leadsInStage > 0) return { error: `Não é possível excluir: ${leadsInStage} lead(s) nesta etapa. Mova-os primeiro.` }
+    const triggerCampaigns = state.campaigns.filter((c) => c.trigger_stage_id === id)
+    if (triggerCampaigns.length > 0) {
+      const names = triggerCampaigns.map((c) => `"${c.name}"`).join(', ')
+      return { error: `Não é possível excluir: etapa é gatilho da(s) campanha(s) ${names}. Altere o gatilho primeiro.` }
+    }
     const index = state.stages.findIndex((s) => s.id === id)
     if (index === -1) return { error: 'Etapa não encontrada.' }
-    state.stages.splice(index, 1)
+    state.stages = state.stages.filter((s) => s.id !== id)
     state.stageRequiredFields = state.stageRequiredFields.filter((f) => f.stage_id !== id)
     return { success: true }
   },
   setStageRequiredFields: (stageId: string, fields: { field_key: string; is_custom_field: boolean }[]) => {
-    state.stageRequiredFields = state.stageRequiredFields.filter((f) => f.stage_id !== stageId)
+    if (!state.stages.some((s) => s.id === stageId)) {
+      return { error: 'Etapa não encontrada.' as const }
+    }
     const now = new Date().toISOString()
-    const next = fields.map((f, i) => ({
-      id: `srf-${stageId}-${i}-${Date.now()}`,
+    const next: StageRequiredFieldRecord[] = fields.map((f) => ({
+      id: `srf-${randomId()}`,
       workspace_id: state.workspace.id,
       stage_id: stageId,
       field_key: f.field_key,
       is_custom_field: f.is_custom_field,
       created_at: now,
     }))
-    state.stageRequiredFields = [...state.stageRequiredFields, ...next]
-    return { success: true }
+    state.stageRequiredFields = [
+      ...state.stageRequiredFields.filter((f) => f.stage_id !== stageId),
+      ...next,
+    ]
+    return { success: true as const }
   },
 }
 

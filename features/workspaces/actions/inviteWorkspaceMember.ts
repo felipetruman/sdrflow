@@ -8,11 +8,14 @@ import { isDemoMode } from '@/lib/demo/data'
 
 type Input = { email: string; role: 'admin' | 'member' }
 
-export async function inviteWorkspaceMember(input: Input): Promise<{ error?: string }> {
+export type InviteWorkspaceMemberResult = { error?: string; info?: string }
+
+export async function inviteWorkspaceMember(input: Input): Promise<InviteWorkspaceMemberResult> {
   try {
     if (isDemoMode()) {
+      // demo mode: feature not supported — surface as info, not error
       void input
-      return { error: 'Convite de membros disponível apenas no modo cloud (Supabase).' }
+      return { info: 'Convite de membros disponível apenas no modo cloud (Supabase).' }
     }
     const supabase = await createClient()
     const workspace = await getCurrentWorkspace()

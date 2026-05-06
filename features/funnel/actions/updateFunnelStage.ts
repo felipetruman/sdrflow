@@ -11,6 +11,7 @@ type Input = { name: string; color?: string }
 export async function updateFunnelStage(id: string, input: Input): Promise<{ error?: string }> {
   try {
     if (isDemoMode()) {
+      // demo mode: no auth context, mutations permitted by design (USE_DEMO_MODE flag)
       const result = demoStore.updateStage(id, input)
       if (!result) return { error: 'Etapa não encontrada' }
       revalidatePath('/kanban')
