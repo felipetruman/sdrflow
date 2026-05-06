@@ -114,7 +114,10 @@ export function KanbanBoard() {
       try {
         const res = await moveLeadStage({ leadId, stageId: targetStage.id })
         if (!res.success) {
-          toast.error(res.error ?? 'Erro ao mover lead.')
+          const fields = res.missingFields?.length
+            ? ` Campos faltando: ${res.missingFields.join(', ')}.`
+            : ''
+          toast.error(`${res.error ?? 'Erro ao mover lead.'}${fields}`)
         } else {
           await load()
           router.refresh()

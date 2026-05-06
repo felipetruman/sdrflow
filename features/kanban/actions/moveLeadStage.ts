@@ -32,9 +32,27 @@ export async function moveLeadStage({ leadId, stageId }: MoveLeadStageInput): Pr
     const { error: invokeError } = await supabase.functions.invoke('move-lead-stage', { body: { leadId, stageId } })
     if (!invokeError) return { success: true }
 
-    // Do not bypass required-field validation when Edge Function is unavailable
+    // Try to extract validation details from the Edge Function response body.
+    // supabase.functions.invoke wraps non-2xx responses in FunctionsHttpError with .context as the original Response.
+    const ctx = (invokeError as { context?: Response }).context
+    if (ctx && typeof ctx.json === 'function') {
+      try {
+        const body = (await ctx.json()) as { error?: string; missingFields?: string[] }
+        if (body && Array.isArray(body.missingFields) && body.missingFields.length > 0) {
+          return {
+            success: false,
+            error: body.error ?? 'Campos obrigatórios faltando',
+            missingFields: body.missingFields,
+          }
+        }
+        if (body?.error) return { success: false, error: body.error }
+      } catch {
+        // fall through to generic error below
+      }
+    }
+
     console.error('move-lead-stage Edge Function failed:', invokeError)
-    return { success: false, error: 'Validação de campos obrigatórios indisponível no momento. Tente novamente em instantes.' }
+    return { success: false, error: 'Não foi possível mover o lead. Tente novamente em instantes.' }
   } catch (error) {
     return { success: false, error: getErrorMessage(error) }
   }
