@@ -141,9 +141,17 @@ supabase --workdir "/home/freedom/freedomdigitalhub/workspace/products/sdrflow" 
 - **Vercel**: conecte o repositório, configure as variáveis públicas e faça deploy.
 - **Supabase**: aplique schema, policies, Edge Functions e variáveis secretas no dashboard.
 
-## 12. Uso de IA no Desenvolvimento
+## 12. Uso de IA no Desenvolvimento (Vibe Coding)
 
-Este projeto contou com apoio de **Claude Code**, **Codex** e **OpenCode** durante o desenvolvimento, documentação e revisão.
+Este projeto se enquadra na categoria de **Vibe Coding / AI-assisted development**: o desenvolvimento, documentação e revisão foram conduzidos com apoio intensivo de **Claude Code (Anthropic)**, **Codex (OpenAI)** e **OpenCode**.
+
+A escolha por **Next.js 15 + Server Actions + Supabase Edge Functions** em vez de plataformas no-code como Lovable, Bolt.new ou v0 foi deliberada e visou:
+
+- Controle total sobre Server Actions, RLS e a integração com Edge Functions.
+- Implementação consistente do design system **Editorial Noir** (tokens próprios, tipografia Syne/DM_Sans/JetBrains_Mono, layout bento) que dificilmente sobreviveria à geração automática de UI.
+- Stack pronta para produção (TypeScript strict, dnd-kit, React Hook Form + Zod) com debug e testes E2E plenos.
+
+Mesmo sem usar uma plataforma low-code específica, o fluxo foi inteiramente *prompt-driven*: planejamento, geração de componentes, refatorações de feature inteira (Editorial Noir em 8 fases), correções de PR review e migração de testes E2E foram orquestrados por agentes de IA com revisão humana.
 
 ## 13. Checklist Obrigatório
 
