@@ -153,7 +153,41 @@ A escolha por **Next.js 15 + Server Actions + Supabase Edge Functions** em vez d
 
 Mesmo sem usar uma plataforma low-code específica, o fluxo foi inteiramente *prompt-driven*: planejamento, geração de componentes, refatorações de feature inteira (Editorial Noir em 8 fases), correções de PR review e migração de testes E2E foram orquestrados por agentes de IA com revisão humana.
 
-## 13. Checklist Obrigatório
+## 13. Decisões Técnicas e Desafios
+
+Esta seção complementa as escolhas já mencionadas (banco, IA, multi-tenancy) com os principais trade-offs e desafios reais enfrentados.
+
+### 13.1 Por que esta estrutura de banco de dados
+
+- **Modelo relacional puro no Postgres** em vez de JSON/document-store: o domínio é fortemente relacional (workspace → leads → mensagens → atividades) e exige integridade referencial (FK + ON DELETE CASCADE) e consultas analíticas no dashboard. Postgres + RLS resolve isolamento sem escrever middleware.
+- **Campos personalizados em tabela separada** (`custom_fields` + `lead_custom_values`) e não em coluna `jsonb` no `leads`: permite `UNIQUE(workspace_id, key)`, validação de tipo (`field_type` enum) e marcar campo personalizado como obrigatório por etapa (`stage_required_fields.is_custom_field`).
+- **`stage_required_fields` desnormalizado** com `field_key` + flag `is_custom_field`: simplifica a validação na Edge Function `move-lead-stage` (loop único cobre padrão e personalizado) ao custo de o `field_key` poder ser nome da coluna padrão (`name`, `phone`) ou `custom_fields.id`. Trade-off aceito pela simplicidade do código de validação.
+- **Função SECURITY DEFINER `is_workspace_member()`** consultada por todas as 33 políticas RLS: evita que cada policy reescreva o subquery de pertencimento ao workspace.
+
+### 13.2 Como estruturei a integração com LLM
+
+- **Edge Function como gateway**, nunca chamada direta do frontend: a `LLM_API_KEY` fica em `Deno.env` do Supabase e nunca chega ao cliente.
+- **Compatibilidade OpenAI-style** (`LLM_BASE_URL`/`LLM_MODEL`/`LLM_API_KEY`): troca de provedor (OpenAI, Groq, Anthropic via gateway, etc.) sem mudar código.
+- **Fallback local determinístico**: quando `LLM_API_KEY` não está setada ou a chamada falha, a função retorna 3 mensagens templadas com os dados do lead. Isso mantém o demo e a Edge Function utilizáveis para o avaliador mesmo sem a chave configurada.
+- **Disparo automático em background**: tanto `createLead` quanto `move-lead-stage` invocam `trigger-generate-messages` com `fetch` sem aguardar a resposta (timeout de 5s no caminho de criação) — a UX do usuário não bloqueia esperando geração.
+
+### 13.3 Como implementei o multi-tenancy
+
+- **`workspace_id` em toda tabela** + RLS aplicado a todas as 10 tabelas: o isolamento é garantido pelo banco, não por filtros aplicativos. Isso elimina classe inteira de bugs de "esqueci de filtrar por workspace".
+- **`workspace_members` com enum `member_role`**: suporta multi-workspace por usuário e papéis admin/membro nativamente. `inviteWorkspaceMember` e `removeWorkspaceMember` validam o papel do solicitante antes de mutar.
+- **`WorkspaceGuard` no client**: assegura que telas só renderizam após resolver o workspace ativo, evitando flash de conteúdo cruzado entre workspaces.
+- **`WorkspaceSwitcher`**: permite trocar de workspace sem logout, persistindo a escolha em cookie via `switchWorkspace`.
+
+### 13.4 Desafios encontrados e como resolvi
+
+- **Conflitos de merge entre Editorial Noir e PRs paralelos** — refatoração do design system (8 fases) tocou 25+ arquivos em paralelo com PRs de Analytics e segurança. Resolvido com: (1) merge preservando HEAD para PR #9 (Editorial Noir como fonte da verdade), (2) cherry-pick seletivo dos arquivos não-UI do PR #8 em vez de rebase commit-a-commit. Aprendizado: refatorações grandes de UI exigem janela exclusiva no `main`.
+- **GitGuardian em commits históricos** — o scanner detectou senha de demo (`demo123`) no histórico mesmo após fixar com env var. Resolvido na fonte (`.env`/`process.env.E2E_PASSWORD`) e com `// gitguardian:ignore` no fallback local. Trade-off: aceitar o ignore para preservar DX local.
+- **Toast de movimentação não exibia campos faltantes** — `supabase.functions.invoke` descartava o body de respostas 4xx, perdendo o array `missingFields` que a Edge Function já retornava. Resolvido (PR #13) lendo o body via `FunctionsHttpError.context.json()` e renderizando "Campos faltando: X, Y, Z" no toast. Os `field_key` brutos foram traduzidos para nomes legíveis em ambos os caminhos (cloud e demo).
+- **Drag-and-drop entre colunas no dnd-kit** — cada coluna é um `SortableContext` independente, então a navegação de teclado nativa não cruza colunas. Mantive o suporte mouse/touch e usei `closestCenter` no `DndContext` raiz para detectar o stage de destino quando solta sobre coluna vazia.
+- **Editar/deletar etapas com leads dentro** — `funnel_stages.id` é referenciado por `leads.stage_id ON DELETE RESTRICT`. Resolvido em `deleteFunnelStage`: bloqueia se a etapa contém leads e retorna mensagem clara, em vez de propagar erro de FK do banco.
+- **Modo demo coexistindo com cloud** — duas fontes de verdade (`demoStore` em memória vs Supabase) exigiam paridade em **toda** action e query. Resolvido com `isDemoMode()` no topo de cada função e o mesmo formato de retorno. Cobre o caso "avaliador sem credenciais" sem branching condicional na UI.
+
+## 14. Checklist Obrigatório
 
 - [✅] Autenticação funcionando
 - [✅] Workspace com multi-tenancy
@@ -172,7 +206,7 @@ Mesmo sem usar uma plataforma low-code específica, o fluxo foi inteiramente *pr
 - [✅] Landing page
 - [✅] Design system enterprise
 
-## 14. Screenshots
+## 15. Screenshots
 
 <!--
 Adicionar aqui capturas de tela da aplicação:
