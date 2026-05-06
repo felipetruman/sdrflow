@@ -92,18 +92,30 @@ export const demoStore = {
     const lead = state.leads.find((item) => item.id === id)
     if (!lead) return null
 
+    const standardFieldLabels: Record<string, string> = {
+      name: 'Nome',
+      email: 'Email',
+      phone: 'Telefone',
+      company: 'Empresa',
+      job_title: 'Cargo',
+      source: 'Origem',
+      notes: 'Observações',
+    }
+
     const requiredFields = state.stageRequiredFields.filter((field) => field.stage_id === stageId)
-    const missingFields = requiredFields.filter((field) => {
+    const missingFields = requiredFields.flatMap((field) => {
       if (field.is_custom_field) {
         const customField = state.customFields.find((custom) => custom.key === field.field_key)
-        if (!customField) return true
+        if (!customField) return [field.field_key]
         const customValue = state.leadCustomValues.find((value) => value.lead_id === id && value.custom_field_id === customField.id)?.value
-        return customValue === null || customValue === undefined || customValue === ''
+        const empty = customValue === null || customValue === undefined || customValue === ''
+        return empty ? [customField.name] : []
       }
 
       const value = lead[field.field_key as keyof Lead]
-      return value === null || value === undefined || value === ''
-    }).map((field) => field.field_key)
+      const empty = value === null || value === undefined || value === ''
+      return empty ? [standardFieldLabels[field.field_key] ?? field.field_key] : []
+    })
 
     if (missingFields.length) {
       return { success: false, error: 'Campos obrigatórios faltando', missingFields }
