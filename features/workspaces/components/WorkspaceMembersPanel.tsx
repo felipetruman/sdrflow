@@ -21,6 +21,7 @@ export function WorkspaceMembersPanel() {
   const [isPending, setIsPending] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [infoMsg, setInfoMsg] = useState('')
 
   async function load() {
     const data = await getWorkspaceMembers()
@@ -37,9 +38,12 @@ export function WorkspaceMembersPanel() {
     setIsPending(true)
     setErrorMsg('')
     setSuccessMsg('')
+    setInfoMsg('')
     const result = await inviteWorkspaceMember({ email: email.trim(), role })
     if (result.error) {
       setErrorMsg(result.error)
+    } else if (result.info) {
+      setInfoMsg(result.info)
     } else {
       setSuccessMsg(`Convite enviado para ${email.trim()}`)
       setEmail('')
@@ -53,8 +57,10 @@ export function WorkspaceMembersPanel() {
     setIsPending(true)
     setErrorMsg('')
     setSuccessMsg('')
+    setInfoMsg('')
     const result = await removeWorkspaceMember(id)
     if (result.error) setErrorMsg(result.error)
+    else if (result.info) setInfoMsg(result.info)
     else await load()
     setIsPending(false)
   }
@@ -117,6 +123,15 @@ export function WorkspaceMembersPanel() {
             style={{ backgroundColor: 'var(--negative-bg)' }}
           >
             {errorMsg}
+          </p>
+        ) : null}
+        {infoMsg ? (
+          <p
+            role="status"
+            className="text-paper-muted border-signal-deep mt-3 rounded-sm border px-3 py-2 text-sm"
+            style={{ backgroundColor: 'var(--signal-bg)' }}
+          >
+            {infoMsg}
           </p>
         ) : null}
         {successMsg ? (

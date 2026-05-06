@@ -34,11 +34,20 @@ export const DEMO_CUSTOM_FIELDS: CustomField[] = [
   { id: 'field-produto', workspace_id: DEMO_WORKSPACE.id, name: 'Produto de Interesse', key: 'produto_interesse', field_type: 'text', options: null, created_at: iso(55), updated_at: iso(1) },
 ]
 
-export const DEMO_STAGE_REQUIRED_FIELDS = [
+export type StageRequiredFieldRecord = {
+  id: string
+  workspace_id: string
+  stage_id: string
+  field_key: string
+  is_custom_field: boolean
+  created_at: string
+}
+
+export const DEMO_STAGE_REQUIRED_FIELDS: StageRequiredFieldRecord[] = [
   { id: 'stage-required-1', workspace_id: DEMO_WORKSPACE.id, stage_id: '66666666-6666-4666-8666-666666666666', field_key: 'company', is_custom_field: false, created_at: iso(40) },
   { id: 'stage-required-2', workspace_id: DEMO_WORKSPACE.id, stage_id: '66666666-6666-4666-8666-666666666666', field_key: 'job_title', is_custom_field: false, created_at: iso(40) },
   { id: 'stage-required-3', workspace_id: DEMO_WORKSPACE.id, stage_id: '77777777-7777-4777-8777-777777777777', field_key: 'segmento', is_custom_field: true, created_at: iso(40) },
-] as const
+]
 
 export const DEMO_LEAD_CUSTOM_VALUES: { id: string; lead_id: string; custom_field_id: string; value: string | null; created_at: string; updated_at: string }[] = [
   { id: 'lead-custom-1', lead_id: 'lead-5', custom_field_id: 'field-segmento', value: 'Serviços', created_at: iso(12), updated_at: iso(1) },
@@ -83,6 +92,11 @@ export const createDemoState = (): DemoState => ({
 
 const state: DemoState = createDemoState()
 
+const randomId = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 export const demoStore = {
   getState: () => state,
   reset: () => Object.assign(state, createDemoState()),
@@ -126,6 +140,65 @@ export const demoStore = {
     return { success: true }
   },
   deleteLead: (id: string) => { const index = state.leads.findIndex((item) => item.id === id); if (index === -1) return null; state.leads.splice(index, 1); return true },
+  addStage: (input: { name: string; color?: string }) => {
+    const maxOrder = state.stages.reduce((max, s) => Math.max(max, s.order_index), -1)
+    const timestamp = new Date().toISOString()
+    const stage: FunnelStage = {
+      id: `stage-${randomId()}`,
+      workspace_id: state.workspace.id,
+      name: input.name,
+      color: input.color ?? '#64748b',
+      order_index: maxOrder + 1,
+      created_at: timestamp,
+      updated_at: timestamp,
+    }
+    state.stages = [...state.stages, stage]
+    return stage
+  },
+  updateStage: (id: string, payload: { name: string; color?: string }) => {
+    const exists = state.stages.some((s) => s.id === id)
+    if (!exists) return null
+    const updated_at = new Date().toISOString()
+    state.stages = state.stages.map((s) =>
+      s.id === id
+        ? { ...s, name: payload.name, color: payload.color !== undefined ? payload.color : s.color, updated_at }
+        : s,
+    )
+    return state.stages.find((s) => s.id === id) ?? null
+  },
+  deleteStage: (id: string) => {
+    const leadsInStage = state.leads.filter((l) => l.stage_id === id).length
+    if (leadsInStage > 0) return { error: `Não é possível excluir: ${leadsInStage} lead(s) nesta etapa. Mova-os primeiro.` }
+    const triggerCampaigns = state.campaigns.filter((c) => c.trigger_stage_id === id)
+    if (triggerCampaigns.length > 0) {
+      const names = triggerCampaigns.map((c) => `"${c.name}"`).join(', ')
+      return { error: `Não é possível excluir: etapa é gatilho da(s) campanha(s) ${names}. Altere o gatilho primeiro.` }
+    }
+    const index = state.stages.findIndex((s) => s.id === id)
+    if (index === -1) return { error: 'Etapa não encontrada.' }
+    state.stages = state.stages.filter((s) => s.id !== id)
+    state.stageRequiredFields = state.stageRequiredFields.filter((f) => f.stage_id !== id)
+    return { success: true }
+  },
+  setStageRequiredFields: (stageId: string, fields: { field_key: string; is_custom_field: boolean }[]) => {
+    if (!state.stages.some((s) => s.id === stageId)) {
+      return { error: 'Etapa não encontrada.' as const }
+    }
+    const now = new Date().toISOString()
+    const next: StageRequiredFieldRecord[] = fields.map((f) => ({
+      id: `srf-${randomId()}`,
+      workspace_id: state.workspace.id,
+      stage_id: stageId,
+      field_key: f.field_key,
+      is_custom_field: f.is_custom_field,
+      created_at: now,
+    }))
+    state.stageRequiredFields = [
+      ...state.stageRequiredFields.filter((f) => f.stage_id !== stageId),
+      ...next,
+    ]
+    return { success: true as const }
+  },
 }
 
 export const enrichLeadsWithStage = (leads: Lead[]) => leads.map((lead) => ({ ...lead, stage: state.stages.find((stage) => stage.id === lead.stage_id) ?? state.stages[0] })) as LeadWithStage[]

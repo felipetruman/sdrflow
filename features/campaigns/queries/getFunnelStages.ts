@@ -1,12 +1,12 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { DEMO_STAGES, isDemoMode } from '@/lib/demo/data'
+import { demoStore, isDemoMode } from '@/lib/demo/data'
 import { getErrorMessage } from '@/lib/utils/errors'
 import type { FunnelStage } from '@/types/app'
 
 export async function getFunnelStages(): Promise<FunnelStage[]> {
-  if (isDemoMode()) return DEMO_STAGES
+  if (isDemoMode()) return [...demoStore.getState().stages].sort((a, b) => a.order_index - b.order_index)
   try {
     const supabase = await createClient()
     const { data: sessionData } = await supabase.auth.getSession()

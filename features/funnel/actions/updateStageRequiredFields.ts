@@ -3,9 +3,16 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentWorkspace } from '@/features/workspaces/queries/getCurrentWorkspace'
 import { getErrorMessage } from '@/lib/utils/errors'
+import { demoStore, isDemoMode } from '@/lib/demo/data'
 
 export async function updateStageRequiredFields({ stageId, fields }: { stageId: string; fields: { field_key: string; is_custom_field: boolean }[] }): Promise<{ error?: string }> {
   try {
+    if (isDemoMode()) {
+      // demo mode: no auth context, mutations permitted by design (USE_DEMO_MODE flag)
+      const result = demoStore.setStageRequiredFields(stageId, fields)
+      if ('error' in result) return { error: result.error }
+      return {}
+    }
     const supabase = await createClient()
     const workspace = await getCurrentWorkspace()
     if (!workspace) return { error: 'Workspace atual não encontrado.' }
