@@ -328,9 +328,56 @@ export interface Database {
           metadata?: Json | null
           created_at?: string
         }
-      }
         Relationships: []
       }
+      ai_api_keys: {
+        Row: {
+          id: string
+          workspace_id: string
+          provider: 'gemini' | 'openai'
+          model: string
+          key_value: string
+          label: string | null
+          priority: number
+          is_primary: boolean
+          is_active: boolean
+          last_validated_at: string | null
+          last_status: 'ok' | 'invalid' | 'rate_limited' | 'unknown' | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          workspace_id: string
+          provider: 'gemini' | 'openai'
+          model: string
+          key_value: string
+          label?: string | null
+          priority?: number
+          is_primary?: boolean
+          is_active?: boolean
+          last_validated_at?: string | null
+          last_status?: 'ok' | 'invalid' | 'rate_limited' | 'unknown' | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          workspace_id?: string
+          provider?: 'gemini' | 'openai'
+          model?: string
+          key_value?: string
+          label?: string | null
+          priority?: number
+          is_primary?: boolean
+          is_active?: boolean
+          last_validated_at?: string | null
+          last_status?: 'ok' | 'invalid' | 'rate_limited' | 'unknown' | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+    }
     Views: {}
     Functions: {
       is_workspace_member: {
