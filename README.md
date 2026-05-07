@@ -83,9 +83,9 @@ O projeto usa **Row Level Security** para isolar dados por workspace. As políti
 
 ## 8. Integração com IA
 
-A Edge Function `generate-messages` recebe o lead e a campanha, valida autenticação, confirma membership no workspace e então chama a API de LLM usando a chave armazenada no ambiente do Supabase.
+As chaves de API são gerenciadas pelo próprio workspace via `/settings/ai` — suporte a **Google Gemini** e **OpenAI**, com validação online ao adicionar, múltiplas chaves por workspace, fallback automático entre chaves ativas e badge de visibilidade na UI (`IA · gemini-2.5-flash` vs `Template offline`).
 
-A chave da IA não fica exposta no frontend. Em caso de falha ou ausência de configuração, a função usa um fallback local para manter o fluxo de demonstração.
+A Edge Function `generate-messages` lê a chave primária ativa da tabela `ai_api_keys` no banco, não de variáveis de ambiente no frontend. A chave nunca é exposta ao cliente. Em caso de falha ou ausência de chaves configuradas, a função retorna templates locais (badge "Template offline") mantendo o fluxo de demonstração operacional.
 
 ## 9. Como rodar localmente
 
@@ -118,9 +118,9 @@ pnpm dev
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Sim | Chave pública/anon para o frontend |
 | `NEXT_PUBLIC_APP_URL` | Sim | URL base da aplicação local ou produção |
 | `SUPABASE_SERVICE_ROLE_KEY` | Não no frontend | Usada apenas em ambiente seguro/Edge Functions |
-| `LLM_API_KEY` | Não no frontend | Chave da API de IA usada só no backend/Edge Functions |
-| `LLM_MODEL` | Opcional | Modelo padrão da geração |
-| `LLM_BASE_URL` | Opcional | Base URL do provedor de IA |
+| `USE_DEMO_MODE` | Opcional | `true` para modo offline sem Supabase |
+
+> **Chaves de IA:** gerenciadas pelo workspace via `/settings/ai` (tabela `ai_api_keys` no banco). Não há variáveis de ambiente para LLM no frontend.
 
 ## Como aplicar migrations e deployar Edge Functions
 
@@ -206,14 +206,60 @@ Esta seção complementa as escolhas já mencionadas (banco, IA, multi-tenancy) 
 - [✅] Landing page
 - [✅] Design system enterprise
 
-## 15. Screenshots
+## 15. Diferenciais Implementados
 
-<!--
-Adicionar aqui capturas de tela da aplicação:
-- Login
-- Dashboard
-- Kanban
-- Leads
-- Campanhas
-- Configurações
--->
+Além dos requisitos obrigatórios, o projeto entrega:
+
+- [✅] **Geração automática por gatilho de etapa** — ao mover lead para a etapa configurada na campanha (ou ao criar diretamente nela), as mensagens são geradas em background sem bloquear a UX
+- [✅] **Edição completa do funil** — criar, renomear, reordenar e excluir etapas com proteção contra deleção de etapas com leads
+- [✅] **Multi-workspace por usuário** — usuário pode participar de múltiplos workspaces; `WorkspaceSwitcher` troca o contexto sem logout
+- [✅] **Convite de membros com papéis** — admin/membro, com `inviteWorkspaceMember` e gerenciamento via `WorkspaceMembersPanel`
+- [✅] **Histórico completo de atividades por lead** — `lead_activities` registra criação, edição, mudança de etapa, geração e envio de mensagens; exibido em `ActivityTimeline`
+- [✅] **Histórico de mensagens com status** — `generated_messages` rastreia `generated` / `copied` / `sent` com timestamps
+- [✅] **Busca e filtros no Kanban** — busca por nome/email/empresa e filtro por etapa, client-side
+- [✅] **Métricas avançadas no dashboard** — taxa de conversão por etapa (`stageConversionRates`), leads por período (7d/30d), mensagens geradas/enviadas por campanha
+- [✅] **Gerenciamento de chaves de API via UI** — `/settings/ai` permite adicionar chaves Gemini/OpenAI com validação online, definir primária e fallbacks automáticos entre chaves ativas
+- [✅] **Badge de visibilidade LLM** — cada mensagem gerada exibe `IA · gemini-2.5-flash` quando veio do LLM ou `Template offline` quando usou fallback local
+- [✅] **RLS enterprise** — 39+ políticas em 10 tabelas usando função `SECURITY DEFINER is_workspace_member()`
+
+## 16. Screenshots
+
+### Landing page
+
+![Landing page](docs/images/01-landing.png)
+
+### Autenticação
+
+![Login](docs/images/02-login.png)
+
+### Dashboard
+
+![Dashboard com métricas](docs/images/05-dashboard.png)
+
+### Kanban
+
+![Kanban com leads](docs/images/17-kanban-com-leads.png)
+
+![Movimentação bloqueada — campos obrigatórios faltando](docs/images/21-kanban-drag-blocked-validation.png)
+
+### Lead — detalhe e painel de IA
+
+![Detalhe do lead](docs/images/13-lead-detalhe-correto.png)
+
+![Painel de geração de mensagens IA](docs/images/14-lead-painel-ia.png)
+
+![Mensagens geradas com badge IA](docs/images/20-mensagens-geradas.png)
+
+### Histórico de atividades
+
+![Activity timeline do lead](docs/images/29-activity-timeline.png)
+
+### Campanhas
+
+![Lista de campanhas](docs/images/08-campanhas.png)
+
+### Configurações
+
+![Campos personalizados](docs/images/10-settings-campos.png)
+
+![Funil editável com regras por etapa](docs/images/11-settings-funil.png)
