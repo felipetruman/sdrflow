@@ -224,13 +224,42 @@ Além dos requisitos obrigatórios, o projeto entrega:
 
 ## 16. Screenshots
 
-<!--
-Adicionar aqui capturas de tela da aplicação:
-- Login
-- Dashboard
-- Kanban
-- Leads
-- Campanhas
-- Configurações
-- Badge "IA · gemini-2.5-flash"
--->
+### Landing page
+
+![Landing page](docs/images/01-landing.png)
+
+### Autenticação
+
+![Login](docs/images/02-login.png)
+
+### Dashboard
+
+![Dashboard com métricas](docs/images/05-dashboard.png)
+
+### Kanban
+
+![Kanban com leads](docs/images/17-kanban-com-leads.png)
+
+![Movimentação bloqueada — campos obrigatórios faltando](docs/images/21-kanban-drag-blocked-validation.png)
+
+### Lead — detalhe e painel de IA
+
+![Detalhe do lead](docs/images/13-lead-detalhe-correto.png)
+
+![Painel de geração de mensagens IA](docs/images/14-lead-painel-ia.png)
+
+![Mensagens geradas com badge IA](docs/images/20-mensagens-geradas.png)
+
+### Histórico de atividades
+
+![Activity timeline do lead](docs/images/29-activity-timeline.png)
+
+### Campanhas
+
+![Lista de campanhas](docs/images/08-campanhas.png)
+
+### Configurações
+
+![Campos personalizados](docs/images/10-settings-campos.png)
+
+![Funil editável com regras por etapa](docs/images/11-settings-funil.png)
