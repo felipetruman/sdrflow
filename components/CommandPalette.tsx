@@ -23,6 +23,7 @@ import {
   Plus,
   Sparkles,
   LogOut,
+  Cpu,
 } from 'lucide-react'
 import { signOut } from '@/features/auth/actions/signOut'
 
@@ -108,6 +109,10 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           <CommandItem onSelect={() => navigate('/settings/members')}>
             <Users />
             <span>Membros do workspace</span>
+          </CommandItem>
+          <CommandItem onSelect={() => navigate('/settings/ai')}>
+            <Cpu />
+            <span>Integração IA</span>
           </CommandItem>
         </CommandGroup>
 

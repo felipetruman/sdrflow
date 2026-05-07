@@ -7,7 +7,14 @@ import type { GeneratedMessage } from '@/types/app'
 
 type Input = { leadId: string; campaignId: string }
 
-export async function generateMessages({ leadId, campaignId }: Input): Promise<{ messages?: GeneratedMessage[]; error?: string }> {
+export type GenerateMessagesResult = {
+  messages?: GeneratedMessage[]
+  source?: 'llm' | 'fallback' | 'demo'
+  model?: string | null
+  error?: string
+}
+
+export async function generateMessages({ leadId, campaignId }: Input): Promise<GenerateMessagesResult> {
   if (isDemoMode()) {
     const lead = demoStore.getState().leads.find((l) => l.id === leadId)
     const campaign = demoStore.getState().campaigns.find((c) => c.id === campaignId)
@@ -24,12 +31,21 @@ export async function generateMessages({ leadId, campaignId }: Input): Promise<{
       campaign,
     }))
     demoStore.getState().messages.push(...newMessages)
-    return { messages: newMessages }
+    return { messages: newMessages, source: 'demo', model: null }
   }
   try {
     const supabase = await createClient()
-    const result = await supabase.functions.invoke<{ messages?: GeneratedMessage[] }>('generate-messages', { body: { leadId, campaignId } })
-    if (!result.error && result.data?.messages) return { messages: result.data.messages as GeneratedMessage[] }
+    const result = await supabase.functions.invoke<{ messages?: GeneratedMessage[]; source?: 'llm' | 'fallback'; model?: string | null }>(
+      'generate-messages',
+      { body: { leadId, campaignId } },
+    )
+    if (!result.error && result.data?.messages) {
+      return {
+        messages: result.data.messages as GeneratedMessage[],
+        source: result.data.source ?? 'fallback',
+        model: result.data.model ?? null,
+      }
+    }
 
     // Do not insert fake messages when Edge Function is unavailable
     console.error('generate-messages Edge Function failed:', result.error)

@@ -12,6 +12,7 @@ import {
   Megaphone,
   GitBranch,
   Sliders,
+  Cpu,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { signOut } from '@/features/auth/actions/signOut'
@@ -48,6 +49,7 @@ const sections: NavSection[] = [
       { href: '/settings/funnel',  label: 'Funil',   icon: GitBranch },
       { href: '/settings/fields',  label: 'Campos',  icon: Sliders },
       { href: '/settings/members', label: 'Membros', icon: Users },
+      { href: '/settings/ai',      label: 'IA',      icon: Cpu },
     ],
   },
 ]
